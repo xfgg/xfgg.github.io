@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="pwn,">
 
 
 
@@ -81,14 +81,18 @@
 
 
 
+<meta name="description" content="0x01 寻找漏洞12  0x02 思路分析12  0x03 攻击12  exp12">
+<meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="xfgg">
+<meta property="og:title" content="level3">
 <meta property="og:url" content="http://yoursite.com/2019/07/27/level3/index.html">
 <meta property="og:site_name" content="xfgg">
+<meta property="og:description" content="0x01 寻找漏洞12  0x02 思路分析12  0x03 攻击12  exp12">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-07-27T11:16:30.503Z">
+<meta property="og:updated_time" content="2019-07-27T11:24:39.555Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xfgg">
+<meta name="twitter:title" content="level3">
+<meta name="twitter:description" content="0x01 寻找漏洞12  0x02 思路分析12  0x03 攻击12  exp12">
 
 
 
@@ -124,7 +128,7 @@
 
 
 
-  <title> | xfgg</title>
+  <title>level3 | xfgg</title>
   
 
 
@@ -268,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">level3</h1>
         
 
         <div class="post-meta">
@@ -280,7 +284,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:16:30+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:23:08+08:00">
                 2019-07-27
               </time>
             
@@ -290,6 +294,28 @@
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
+                    <span itemprop="name">攻防世界</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -318,7 +344,13 @@
       
 
       
-        
+        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -333,6 +365,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/pwn/" rel="tag"># pwn</a>
+          
+        </div>
+      
 
       
       
@@ -342,8 +380,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/pwn1/" rel="next" title="forgot">
-                <i class="fa fa-chevron-left"></i> forgot
+              <a href="/2019/07/27/pwn1/" rel="next" title="pwn1">
+                <i class="fa fa-chevron-left"></i> pwn1
               </a>
             
           </div>
@@ -351,6 +389,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/27/easy_heap/" rel="prev" title="easy_heap">
+                easy_heap <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -402,8 +444,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -418,7 +469,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -429,7 +480,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
@@ -470,6 +521,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-寻找漏洞"><span class="nav-number">1.</span> <span class="nav-text">0x01 寻找漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-思路分析"><span class="nav-number">2.</span> <span class="nav-text">0x02 思路分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-攻击"><span class="nav-number">3.</span> <span class="nav-text">0x03 攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">4.</span> <span class="nav-text">exp</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

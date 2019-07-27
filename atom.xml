@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-07-27T11:20:25.721Z</updated>
+  <updated>2019-07-27T11:26:49.538Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,67 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>babyheap</title>
+    <link href="http://yoursite.com/2019/07/27/baby_heap/"/>
+    <id>http://yoursite.com/2019/07/27/baby_heap/</id>
+    <published>2019-07-27T11:26:14.896Z</published>
+    <updated>2019-07-27T11:26:49.538Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="RCTF 2019" scheme="http://yoursite.com/categories/RCTF-2019/"/>
+    
+    
+      <category term="pwn" scheme="http://yoursite.com/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>easy_heap</title>
+    <link href="http://yoursite.com/2019/07/27/easy_heap/"/>
+    <id>http://yoursite.com/2019/07/27/easy_heap/</id>
+    <published>2019-07-27T11:24:51.374Z</published>
+    <updated>2019-07-27T11:26:00.113Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="sctf 2019" scheme="http://yoursite.com/categories/sctf-2019/"/>
+    
+    
+      <category term="pwn" scheme="http://yoursite.com/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>level3</title>
+    <link href="http://yoursite.com/2019/07/27/level3/"/>
+    <id>http://yoursite.com/2019/07/27/level3/</id>
+    <published>2019-07-27T11:23:08.790Z</published>
+    <updated>2019-07-27T11:24:39.555Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure><h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure><h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure><h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;0x01-寻找漏洞&quot;&gt;&lt;a href=&quot;#0x01-寻找漏洞&quot; class=&quot;headerlink&quot; title=&quot;0x01 寻找漏洞&quot;&gt;&lt;/a&gt;0x01 寻找漏洞&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td
+      
+    
+    </summary>
+    
+      <category term="攻防世界" scheme="http://yoursite.com/categories/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/"/>
+    
+    
+      <category term="pwn" scheme="http://yoursite.com/tags/pwn/"/>
+    
+  </entry>
   
   <entry>
     <title>pwn1</title>
