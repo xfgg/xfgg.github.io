@@ -346,13 +346,13 @@
           
             <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec int_overflow</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/int_overflow'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">只开启了nx保护</span><br></pre></td></tr></table></figure>
 
-<p><img src alt></p>
+<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow1.png" alt></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">read</span> 函数处可以进行溢出，但是需要经过 check_passwd 函数才能将跳出login。现在再看一下 check_passwd 函数内部，</span><br></pre></td></tr></table></figure>
 
-<p><img src alt></p>
+<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow2.png" alt></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v3 = strlen(s);造成整数溢出的一个点，我们再看一下此处的汇编代码。</span><br></pre></td></tr></table></figure>
 
-<p><img src alt></p>
+<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow3.png" alt></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">call strlen 之后 返回值放在了al寄存器中，这是一个八位的积存器，也就是说如果 s 字符串的长度 大于255 就会造成 整数溢出。 再加上四字节就可以溢出</span><br></pre></td></tr></table></figure>
 
 <h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我们需要进到<span class="keyword">else</span>里，将 <span class="built_in">read</span> 读进来的 s 复制到 dest 中，是一个可以利用的栈溢出。</span><br><span class="line">现在我们知道了可以通过整数溢出到达 栈溢出漏洞，修改程序执行流，使程序跳转到 what_is_this 中。</span><br></pre></td></tr></table></figure>
