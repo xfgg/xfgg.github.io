@@ -89,14 +89,14 @@
 <meta property="og:site_name" content="xfgg">
 <meta property="og:description" content="0x01 寻找漏洞12345678xfgg@ubuntu:~/Downloads$ checksec int_overflow[*] &apos;/home/xfgg/Downloads/int_overflow&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow1.png?raw=true">
+<meta property="og:image" content="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png">
 <meta property="og:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow2.png?raw=true">
 <meta property="og:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow3.png?raw=true">
-<meta property="og:updated_time" content="2019-07-27T07:37:47.231Z">
+<meta property="og:updated_time" content="2019-07-27T07:41:43.015Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="int_overflow">
 <meta name="twitter:description" content="0x01 寻找漏洞12345678xfgg@ubuntu:~/Downloads$ checksec int_overflow[*] &apos;/home/xfgg/Downloads/int_overflow&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:">
-<meta name="twitter:image" content="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow1.png?raw=true">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png">
 
 
 
@@ -350,7 +350,7 @@
       
         <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec int_overflow</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/int_overflow'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">只开启了nx保护</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow1.png?raw=true" alt></p>
+<p><img src="https://raw.githubusercontent.com/xfgg/xfgg.github.io/master/images/int_overflow1.png" alt></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">read</span> 函数处可以进行溢出，但是需要经过 check_passwd 函数才能将跳出login。现在再看一下 check_passwd 函数内部，</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://github.com/xfgg/xfgg.github.io/blob/master/images/int_overflow2.png?raw=true" alt></p>
