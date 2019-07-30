@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="pwn,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xfgg" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="前言原文：http://bobao.360.cn/learning/detail/3298.html 1在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。  DynELF12345678">
+<meta name="keywords" content="pwn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DynELF的应用">
+<meta property="og:url" content="http://yoursite.com/2019/07/30/DynELF的应用/index.html">
+<meta property="og:site_name" content="xfgg">
+<meta property="og:description" content="前言原文：http://bobao.360.cn/learning/detail/3298.html 1在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。  DynELF12345678">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-07-30T02:23:54.260Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DynELF的应用">
+<meta name="twitter:description" content="前言原文：http://bobao.360.cn/learning/detail/3298.html 1在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。  DynELF12345678">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/07/30/DynELF的应用/">
+
+
+
+
+
+  <title>DynELF的应用 | xfgg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xfgg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/DynELF的应用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DynELF的应用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-30T10:17:49+08:00">
+                2019-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/理论知识/" itemprop="url" rel="index">
+                    <span itemprop="name">理论知识</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>原文：<a href="http://bobao.360.cn/learning/detail/3298.html" target="_blank" rel="noopener">http://bobao.360.cn/learning/detail/3298.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。</span><br></pre></td></tr></table></figure>
+
+<h3 id="DynELF"><a href="#DynELF" class="headerlink" title="DynELF"></a>DynELF</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">DynELF是pwntools中专门用来应对无libc情况的漏洞利用模块，其基本代码框架如下。</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">'./xxx'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种预处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = <span class="string">"xxxxxxxx"</span> + address + <span class="string">"xxxxxxxx"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = p.recv(4)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.debug(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf=ELF(<span class="string">"./xxx"</span>))      <span class="comment">#初始化DynELF模块 </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">systemAddress = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)  <span class="comment">#在libc文件中搜索system函数的地址</span></span><br><span class="line"></span><br><span class="line">需要使用者进行的工作主要集中在leak函数的具体实现上，上面的代码只是个模板。其中，address就是leak函数要泄漏信息的所在地址，而payload就是触发目标程序泄漏address处信息的攻击代码。</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用条件"><a href="#使用条件" class="headerlink" title="使用条件"></a>使用条件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">不管有没有libc文件，要想获得目标系统的system函数地址，首先都要求目标二进制程序中存在一个能够泄漏目标系统内存中libc空间内信息的漏洞。同时，由于我们是在对方内存中不断搜索地址信息，故我们需要这样的信息泄露漏洞能够被反复调用。以下是大致归纳的主要使用条件：</span><br><span class="line">1）目标程序存在可以泄露libc空间信息的漏洞，如<span class="built_in">read</span>@got就指向libc地址空间内；</span><br><span class="line"></span><br><span class="line">2）目标程序中存在的信息泄露漏洞能够反复触发，从而可以不断泄露libc地址空间内的信息。</span><br><span class="line"></span><br><span class="line">当然，以上仅仅是实现利用的基本条件，不同的目标程序和运行环境都会有一些坑需要绕过。接下来，我们主要针对write和puts这两个普遍用来泄漏信息的函数在实际配合DynELF工作时可能遇到的问题，给出相应的解决方法。</span><br></pre></td></tr></table></figure>
+
+<h3 id="write函数"><a href="#write函数" class="headerlink" title="write函数"></a>write函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">write函数原型是write(fd, addr, len)，即将addr作为起始地址，读取len字节的数据到文件流fd（0表示标准输入流stdin、1表示标准输出流stdout）。write函数的优点是可以读取任意长度的内存信息，即它的打印长度只受len参数控制，缺点是需要传递3个参数，特别是在x64环境下，可能会带来一些困扰。</span><br><span class="line">在x64环境下，函数的参数是通过寄存器传递的，rdi对应第一个参数，rsi对应第二个参数，rdx对应第三个参数，往往凑不出类似“pop rdi; ret”、“pop rsi; ret”、“pop rdx; ret”等3个传参的gadget。此时，可以考虑使用__libc_csu_init函数的通用gadget，具体原理请参见文章。简单的说，就是通过__libc_csu_init函数的两段代码来实现3个参数的传递，这两段代码普遍存在于x64二进制程序中，只不过是间接地传递参数，而不像原来，是通过pop指令直接传递参数。</span><br><span class="line"></span><br><span class="line">.text:000000000040075A   pop  rbx  <span class="comment">#需置为0，为配合第二段代码的call指令寻址</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075B   pop  rbp  <span class="comment">#需置为1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075C   pop  r12  <span class="comment">#需置为要调用的函数地址，注意是got地址而不是plt地址，因为第二段代码中是call指令</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075E   pop  r13  <span class="comment">#write函数的第三个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400760   pop  r14  <span class="comment">#write函数的第二个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400762   pop  r15  <span class="comment">#write函数的第一个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400764   retn</span><br><span class="line"></span><br><span class="line">第二段代码如下</span><br><span class="line"></span><br><span class="line">.text:0000000000400740   mov  rdx, r13</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400743   mov  rsi, r14</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400746   mov  edi, r15d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400749   call  qword ptr [r12+rbx*8]</span><br><span class="line"></span><br><span class="line">这两段代码运行后，会将栈顶指针移动56字节，我们在栈中布置56个字节即可。</span><br><span class="line"></span><br><span class="line">这样，我们便解决了write函数在leak信息中存在的问题，具体的应用会放到后面的3道题目中讲。</span><br></pre></td></tr></table></figure>
+
+<h3 id="puts函数"><a href="#puts函数" class="headerlink" title="puts函数"></a>puts函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">puts的原型是puts(addr)，即将addr作为起始地址输出字符串，直到遇到“\x00”字符为止。也就是说，puts函数输出的数据长度是不受控的，只要我们输出的信息中包含\x00截断符，输出就会终止，且会自动将“\n”追加到输出字符串的末尾，这是puts函数的缺点，而优点就是需要的参数少，只有1个，无论在x32还是x64环境下，都容易调用。</span><br><span class="line">为了克服输入不受控这一缺点，我们考虑利用puts函数输出的字符串最后一位为“\n“这一特点，分两种情况来解决。</span><br><span class="line"></span><br><span class="line">（1）puts输出完后就没有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">'xxx\n'</span>) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#由于接收完标志字符串结束的回车符后，就没有其他输出了，故先等待1秒钟，如果确实接收不到了，就说明输出结束了</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#以便与不是标志字符串结束的回车符（0x0A）混淆，这也利用了recv函数的timeout参数，即当timeout结束后仍得不到输出，则直接返回空字符串””</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(numb=1, timeout=1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">""</span>:  <span class="comment">#接收到的上一个字符为回车符，而当前接收不到新字符，则</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf = buf[:-1]             <span class="comment">#删除puts函数输出的末尾回车符</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4]  <span class="comment">#取指定字节数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">puts输出完后还有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">"xxx\n"</span>)) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">"x"</span>:  <span class="comment">#一定要找到泄漏信息的字符串特征</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data = buf[:-1]                     </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4] </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他需要注意的"><a href="#其他需要注意的" class="headerlink" title="其他需要注意的"></a>其他需要注意的</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在信息泄露过程中，由于循环制造溢出，故可能会导致栈结构发生不可预料的变化，可以尝试调用目标二进制程序的_start函数来重新开始程序以恢复栈</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pwn/" rel="tag"># pwn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/28/stack2/" rel="next" title="stack2">
+                <i class="fa fa-chevron-left"></i> stack2
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">xfgg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DynELF"><span class="nav-number">2.</span> <span class="nav-text">DynELF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用条件"><span class="nav-number">3.</span> <span class="nav-text">使用条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#write函数"><span class="nav-number">4.</span> <span class="nav-text">write函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#puts函数"><span class="nav-number">5.</span> <span class="nav-text">puts函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他需要注意的"><span class="nav-number">6.</span> <span class="nav-text">其他需要注意的</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xfgg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
