@@ -81,20 +81,18 @@
 
 
 
-<meta name="description" content="格式化字符串漏洞基本原理12345678910111213格式化字符串漏洞在通用漏洞类型库CWE中的编号是134，其解释为“软件使用了格式化字符串作为参数，且该格式化字符串来自外部输入”。会触发该漏洞的函数很有限，主要就是printf、sprintf、fprintf等print家族函数。介绍格式化字符串原理的文章有很多，我这里就以printf函数为例，简单回顾其中的要点。printf()函数的一般">
+<meta name="description" content="堆的系统学习 first_fit123456789101112131415161718192021222324252627282930313233343536373839#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;string.h&amp;gt;int main()&amp;#123;	fprintf(stderr, &quot;This fi">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="格式化字符串漏洞">
-<meta property="og:url" content="http://yoursite.com/2019/07/27/格式化字符/index.html">
+<meta property="og:title" content="first_fit">
+<meta property="og:url" content="http://yoursite.com/2019/08/02/first_fit.c/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="格式化字符串漏洞基本原理12345678910111213格式化字符串漏洞在通用漏洞类型库CWE中的编号是134，其解释为“软件使用了格式化字符串作为参数，且该格式化字符串来自外部输入”。会触发该漏洞的函数很有限，主要就是printf、sprintf、fprintf等print家族函数。介绍格式化字符串原理的文章有很多，我这里就以printf函数为例，简单回顾其中的要点。printf()函数的一般">
+<meta property="og:description" content="堆的系统学习 first_fit123456789101112131415161718192021222324252627282930313233343536373839#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;string.h&amp;gt;int main()&amp;#123;	fprintf(stderr, &quot;This fi">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="http://p2.qhimg.com/t0199b46dc9f9480f6f.png">
-<meta property="og:updated_time" content="2019-07-27T06:44:15.991Z">
+<meta property="og:updated_time" content="2019-08-02T03:40:00.851Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="格式化字符串漏洞">
-<meta name="twitter:description" content="格式化字符串漏洞基本原理12345678910111213格式化字符串漏洞在通用漏洞类型库CWE中的编号是134，其解释为“软件使用了格式化字符串作为参数，且该格式化字符串来自外部输入”。会触发该漏洞的函数很有限，主要就是printf、sprintf、fprintf等print家族函数。介绍格式化字符串原理的文章有很多，我这里就以printf函数为例，简单回顾其中的要点。printf()函数的一般">
-<meta name="twitter:image" content="http://p2.qhimg.com/t0199b46dc9f9480f6f.png">
+<meta name="twitter:title" content="first_fit">
+<meta name="twitter:description" content="堆的系统学习 first_fit123456789101112131415161718192021222324252627282930313233343536373839#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;#include &amp;lt;string.h&amp;gt;int main()&amp;#123;	fprintf(stderr, &quot;This fi">
 
 
 
@@ -124,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/07/27/格式化字符/">
+  <link rel="canonical" href="http://yoursite.com/2019/08/02/first_fit.c/">
 
 
 
 
 
-  <title>格式化字符串漏洞 | xfgg</title>
+  <title>first_fit | xfgg</title>
   
 
 
@@ -257,7 +255,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/格式化字符/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/02/first_fit.c/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xfgg">
@@ -274,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">格式化字符串漏洞</h1>
+          <h1 class="post-title" itemprop="name headline">first_fit</h1>
         
 
         <div class="post-meta">
@@ -286,8 +284,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T14:44:31+08:00">
-                2019-07-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-02T07:36:00+08:00">
+                2019-08-02
               </time>
             
 
@@ -309,8 +307,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/理论知识/" itemprop="url" rel="index">
-                    <span itemprop="name">理论知识</span>
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
                   </a>
                 </span>
 
@@ -346,14 +344,10 @@
       
 
       
-        <h3 id="格式化字符串漏洞基本原理"><a href="#格式化字符串漏洞基本原理" class="headerlink" title="格式化字符串漏洞基本原理"></a>格式化字符串漏洞基本原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">格式化字符串漏洞在通用漏洞类型库CWE中的编号是134，其解释为“软件使用了格式化字符串作为参数，且该格式化字符串来自外部输入”。会触发该漏洞的函数很有限，主要就是<span class="built_in">printf</span>、sprintf、fprintf等<span class="built_in">print</span>家族函数。介绍格式化字符串原理的文章有很多，我这里就以<span class="built_in">printf</span>函数为例，简单回顾其中的要点。</span><br><span class="line"></span><br><span class="line"><span class="built_in">printf</span>()函数的一般形式为<span class="built_in">printf</span>(<span class="string">"format"</span>, 输出表列)，其第一个参数就是格式化字符串，用来告诉程序以什么格式进行输出。正常情况下，我们是这样使用的：</span><br><span class="line"></span><br><span class="line">char str[100];</span><br><span class="line">scanf(<span class="string">"%s"</span>,str);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%s"</span>,str);</span><br><span class="line">但也会有人这么用：</span><br><span class="line"></span><br><span class="line">char str[100];</span><br><span class="line">scanf(<span class="string">"%s"</span>,str);</span><br><span class="line"><span class="built_in">printf</span>(str)</span><br><span class="line">也许代码编写者的本意只是单纯打印一段字符（如“hello world”），但如果这段字符串来源于外部用户可控的输入，则该用户完全可以在字符串中嵌入格式化字符（如%s）。那么，由于<span class="built_in">printf</span>允许参数个数不固定，故<span class="built_in">printf</span>会自动将这段字符当作format参数，而用其后内存中的数据匹配format参数。</span><br></pre></td></tr></table></figure>
+        <p>堆的系统学习</p>
+<h3 id="first-fit"><a href="#first-fit" class="headerlink" title="first_fit"></a>first_fit</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string.h&gt;</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, <span class="string">"This file doesn't demonstrate an attack, but shows the nature of glibc's allocator.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"glibc uses a first-fit algorithm to select a free chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"If a chunk is free and large enough, malloc will select this chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"This can be exploited in a use-after-free situation.\n"</span>);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Allocating 2 buffers. They can be large, don't have to be fastbin.\n"</span>);</span><br><span class="line">	char* a = malloc(512);</span><br><span class="line">	char* b = malloc(256);</span><br><span class="line">	char* c;</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(512): %p\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(256): %p\n"</span>, b);</span><br><span class="line">	fprintf(stderr, <span class="string">"we could continue mallocing here...\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"now let's put a string at a that we can read later \"this is A!\"\n"</span>);</span><br><span class="line">	strcpy(a, <span class="string">"this is A!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Freeing the first one...\n"</span>);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"We don't need to free anything again. As long as we allocate less than 512, it will end up at %p\n"</span>, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"So, let's allocate 500 bytes\n"</span>);</span><br><span class="line">	c = malloc(500);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd malloc(500): %p\n"</span>, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"And put a different string here, \"this is C!\"\n"</span>);</span><br><span class="line">	strcpy(c, <span class="string">"this is C!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd allocation %p points to %s\n"</span>, c, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"If we reuse the first allocation, it now holds the data from the third allocation.\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">执行程序后的输出</span><br></pre></td></tr></table></figure>
 
-<p><img src="http://p2.qhimg.com/t0199b46dc9f9480f6f.png" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">以上图为例，假设调用<span class="built_in">printf</span>(str)时的栈是这样的。</span><br><span class="line"></span><br><span class="line">1）如str就是“hello world”，则直接输出“hello world”；</span><br><span class="line"></span><br><span class="line">2）如str是format，比如是%2<span class="variable">$x</span>，则输出偏移2处的16进制数据0xdeadbeef。</span><br><span class="line"></span><br><span class="line">通过组合变换格式化字符串参数，我们可以读取任意偏移处的数据或向任意偏移处写数据，从而达到利用格式化字符串漏洞的作用。</span><br></pre></td></tr></table></figure>
-
-<h3 id="基本的格式化字符串参数"><a href="#基本的格式化字符串参数" class="headerlink" title="基本的格式化字符串参数"></a>基本的格式化字符串参数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">%c：输出字符，配上%n可用于向指定地址写数据。</span><br><span class="line"></span><br><span class="line">%d：输出十进制整数，配上%n可用于向指定地址写数据。</span><br><span class="line"></span><br><span class="line">%x：输出16进制数据，如%i<span class="variable">$x</span>表示要泄漏偏移i处4字节长的16进制数据，%i<span class="variable">$lx</span>表示要泄漏偏移i处8字节长的16进制数据，32bit和64bit环境下一样。</span><br><span class="line"></span><br><span class="line">%p：输出16进制数据，与%x基本一样，只是附加了前缀0x，在32bit下输出4字节，在64bit下输出8字节，可通过输出字节的长度来判断目标环境是32bit还是64bit。</span><br><span class="line"></span><br><span class="line">%s：输出的内容是字符串，即将偏移处指针指向的字符串输出，如%i<span class="variable">$s</span>表示输出偏移i处地址所指向的字符串，在32bit和64bit环境下一样，可用于读取GOT表等信息。</span><br><span class="line"></span><br><span class="line">%n：将%n之前<span class="built_in">printf</span>已经打印的字符个数赋值给偏移处指针所指向的地址位置，如%100×10<span class="variable">$n</span>表示将0x64写入偏移10处保存的指针所指向的地址（4字节），而%<span class="variable">$hn</span>表示写入的地址空间为2字节，%<span class="variable">$hhn</span>表示写入的地址空间为1字节，%<span class="variable">$lln</span>表示写入的地址空间为8字节，在32bit和64bit环境下一样。有时，直接写4字节会导致程序崩溃或等候时间过长，可以通过%<span class="variable">$hn</span>或%<span class="variable">$hhn</span>来适时调整。</span><br><span class="line"></span><br><span class="line">%n是通过格式化字符串漏洞改变程序流程的关键方式，而其他格式化字符串参数可用于读取信息或配合%n写数据</span><br><span class="line"></span><br><span class="line">原文链接：https://www.anquanke.com/post/id/85785</span><br></pre></td></tr></table></figure>
-
-
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">This file doesn<span class="string">'t demonstrate an attack, but shows the nature of glibc'</span>s allocator.</span><br><span class="line">glibc uses a first-fit algorithm to select a free chunk.</span><br><span class="line">If a chunk is free and large enough, malloc will select this chunk.</span><br><span class="line">This can be exploited <span class="keyword">in</span> a use-after-free situation.</span><br><span class="line">Allocating  buffers. They can be large, don<span class="string">'t have to be fastbin.</span></span><br><span class="line"><span class="string">1st ): 0x245b420</span></span><br><span class="line"><span class="string">2nd ): 0x245b630</span></span><br><span class="line"><span class="string">we could continue mallocing here...</span></span><br><span class="line"><span class="string">now let'</span>s put a string at a that we can <span class="built_in">read</span> later <span class="string">"this is A!"</span></span><br><span class="line">first allocation 0x245b420 points to this is A!</span><br><span class="line">Freeing the first one...</span><br><span class="line">We don<span class="string">'t need to free anything again. As long as we allocate less than 512, it will end up at 0x245b420</span></span><br><span class="line"><span class="string">So, let'</span>s allocate 500 bytes</span><br><span class="line">3rd ): 0x245b420</span><br><span class="line">And put a different string here, <span class="string">"this is C!"</span></span><br><span class="line">3rd allocation 0x245b420 points to this is C!</span><br><span class="line">first allocation 0x245b420 points to this is C!</span><br><span class="line">If we reuse the first allocation, it now holds the data from the third allocation.</span><br><span class="line"></span><br><span class="line">这个案例只是讲了glibc分配chunk时的first fit原则,可以用于use after free漏洞,比较简单,对照看看源码和输出即可,</span><br><span class="line"></span><br><span class="line">我的理解是 free(a)之后a的指针空闲了出来 除非字节大于512 不然还是输出a的值 0x245b420，c字节为500，所以还是输出0x245b420</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -383,8 +377,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/string/" rel="next" title="string">
-                <i class="fa fa-chevron-left"></i> string
+              <a href="/2019/07/31/level2/" rel="next" title="level1">
+                <i class="fa fa-chevron-left"></i> level1
               </a>
             
           </div>
@@ -392,10 +386,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/07/27/cgpwn2/" rel="prev" title="cgpwn2">
-                cgpwn2 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -534,7 +524,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#格式化字符串漏洞基本原理"><span class="nav-number">1.</span> <span class="nav-text">格式化字符串漏洞基本原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本的格式化字符串参数"><span class="nav-number">2.</span> <span class="nav-text">基本的格式化字符串参数</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#first-fit"><span class="nav-number">1.</span> <span class="nav-text">first_fit</span></a></li></ol></div>
             
 
           </div>
