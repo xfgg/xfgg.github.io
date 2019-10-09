@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="pwn,">
 
 
 
@@ -81,17 +81,18 @@
 
 
 
-<meta name="description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环">
+<meta name="description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环语句">
+<meta name="keywords" content="pwn">
 <meta property="og:type" content="article">
-<meta property="og:title" content="xfgg">
+<meta property="og:title" content="off by one">
 <meta property="og:url" content="http://yoursite.com/2019/10/09/off by one/index.html">
 <meta property="og:site_name" content="xfgg">
-<meta property="og:description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环">
+<meta property="og:description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环语句">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-10-09T11:29:31.769Z">
+<meta property="og:updated_time" content="2019-10-09T11:42:34.239Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="xfgg">
-<meta name="twitter:description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环">
+<meta name="twitter:title" content="off by one">
+<meta name="twitter:description" content="off by one漏洞原理1234567严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括使用循环语句">
 
 
 
@@ -127,7 +128,7 @@
 
 
 
-  <title> | xfgg</title>
+  <title>off by one | xfgg</title>
   
 
 
@@ -271,7 +272,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">off by one</h1>
         
 
         <div class="post-meta">
@@ -293,6 +294,28 @@
             
           </span>
 
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ctf-wiki/" itemprop="url" rel="index">
+                    <span itemprop="name">ctf-wiki</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -321,9 +344,7 @@
       
 
       
-        <hr>
-<hr>
-<h3 id="off-by-one漏洞原理"><a href="#off-by-one漏洞原理" class="headerlink" title="off by one漏洞原理"></a>off by one漏洞原理</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。</span><br><span class="line"></span><br><span class="line">off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括</span><br><span class="line"></span><br><span class="line">使用循环语句向堆块中写入数据时，循环的次数设置错误（这在C 语言初学者中很常见）导致多写入了一个字节。</span><br><span class="line">字符串操作不合适</span><br><span class="line">一般来说，单字节溢出被认为是难以利用的，但是因为Linux 的堆管理机制ptmalloc 验证的松散性，基于Linux 堆的off-by-one 漏洞利用起来并不复杂，并且威力强大。此外，需要说明的一点是off-by-one 是可以基于各种缓冲区的，比如栈、bss 段等等，但是堆上（heap based） 的off-by-one 是CTF 中比较常见的。我们这里仅讨论堆上的off-by-one 情况。</span><br></pre></td></tr></table></figure>
+        <h3 id="off-by-one漏洞原理"><a href="#off-by-one漏洞原理" class="headerlink" title="off by one漏洞原理"></a>off by one漏洞原理</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">严格来说 off-by-one 漏洞是一种特殊的溢出漏洞，off-by-one 指程序向缓冲区中写入时，写入的字节数超过了这个缓冲区本身所申请的字节数并且只越界了一个字节。</span><br><span class="line"></span><br><span class="line">off-by-one 是指单字节缓冲区溢出，这种漏洞的产生往往与边界验证不严和字符串操作有关，当然也不排除写入的size 正好就只多了一个字节的情况。其中边界验证不严通常包括</span><br><span class="line"></span><br><span class="line">使用循环语句向堆块中写入数据时，循环的次数设置错误（这在C 语言初学者中很常见）导致多写入了一个字节。</span><br><span class="line">字符串操作不合适</span><br><span class="line">一般来说，单字节溢出被认为是难以利用的，但是因为Linux 的堆管理机制ptmalloc 验证的松散性，基于Linux 堆的off-by-one 漏洞利用起来并不复杂，并且威力强大。此外，需要说明的一点是off-by-one 是可以基于各种缓冲区的，比如栈、bss 段等等，但是堆上（heap based） 的off-by-one 是CTF 中比较常见的。我们这里仅讨论堆上的off-by-one 情况。</span><br></pre></td></tr></table></figure>
 
 <h3 id="off-by-one利用思路"><a href="#off-by-one利用思路" class="headerlink" title="off by one利用思路"></a>off by one利用思路</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>溢出字节为可控制任意字节：通过修改大小造成块结构之间出现重叠从而泄露其他块数据，或是覆盖其他块数据。也可使用<span class="literal">NULL</span>字节溢出的方法</span><br><span class="line"><span class="number">2.</span>溢出字节为<span class="literal">NULL</span>字节：在size为<span class="number">0x100</span>的时候，溢出<span class="literal">NULL</span>字节可以使得prev_in_use位被清，这样前块会被认为是<span class="built_in">free</span>块。（<span class="number">1</span>）这时可以选择使用unlink方法（见unlink部分）进行处理。（<span class="number">2</span>）另外，这时prev_size域就会启用，就可以伪造prev_size，从而造成块之间发生重叠。此方法的关键在于unlink的时候没有检查按照prev_size找到的块的后一块（理论上是当前正在unlink的块）与当前正在unlink的块大小是否相等。</span><br><span class="line"></span><br><span class="line">C语言代码示例：</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">my_gets</span><span class="params">(<span class="keyword">char</span> *ptr,<span class="keyword">int</span> size)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;=size;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        ptr[i]=getchar();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">void</span> *chunk1,*chunk2;</span><br><span class="line">    chunk1=<span class="built_in">malloc</span>(<span class="number">16</span>);</span><br><span class="line">    chunk2=<span class="built_in">malloc</span>(<span class="number">16</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Get intput"</span>);</span><br><span class="line">    my_gets(chunk1,<span class="number">16</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">我们自己编写的my_gets 函数导致了一个off-by-one 漏洞，原因是<span class="keyword">for</span> 循环的边界没有控制好导致写入多执行了一次，这也被称为栅栏错误</span><br><span class="line">wikipedia: 栅栏错误（有时也称为电线杆错误或者灯柱错误）是差一错误的一种。如以下问题：</span><br><span class="line">建造一条直栅栏（即不围圈），长<span class="number">30</span> 米、每条栅栏柱间相隔<span class="number">3</span> 米，需要多少条栅栏柱？</span><br><span class="line">最容易想到的答案<span class="number">10</span> 是错的。这个栅栏有<span class="number">10</span> 个间隔，<span class="number">11</span> 条栅栏柱。</span><br><span class="line"></span><br><span class="line">没输入前：</span><br><span class="line"><span class="number">0x602000</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000021</span> &lt;=== chunk1</span><br><span class="line"><span class="number">0x602010</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x602020</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000021</span> &lt;=== chunk2</span><br><span class="line"><span class="number">0x602030</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000000</span></span><br><span class="line">输入后：</span><br><span class="line"><span class="number">0x602000</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000021</span> &lt;=== chunk1</span><br><span class="line"><span class="number">0x602010</span>: <span class="number">0x4141414141414141</span> <span class="number">0x4141414141414141</span></span><br><span class="line"><span class="number">0x602020</span>: <span class="number">0x0000000000000041</span> <span class="number">0x0000000000000021</span> &lt;=== chunk2</span><br><span class="line"><span class="number">0x602030</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000000</span></span><br><span class="line">    </span><br><span class="line">示例<span class="number">2</span>：</span><br><span class="line">字符串的溢出操作</span><br><span class="line"><span class="keyword">int</span> main(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">char</span> buffer[<span class="number">40</span>]=<span class="string">""</span>;</span><br><span class="line">    <span class="keyword">void</span> *chunk1;</span><br><span class="line">    chunk1=<span class="built_in">malloc</span>(<span class="number">24</span>);</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"Get Input"</span>);</span><br><span class="line">    gets(buffer);</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">strlen</span>(buffer)==<span class="number">24</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">strcpy</span>(chunk1,buffer);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">程序乍看上去没有任何问题（不考虑栈溢出），可能很多人在实际的代码中也是这样写的。但是strlen和strcpy的行为不一致却导致了off-by-one的发生。strlen是我们很熟悉的计算ascii字符串长度的函数，这个函数在计算字符串长度时是不把结束符'\x00'计算在内的，但是strcpy在复制字符串时会拷贝结束符'\x00'。这就导致了我们向chunk1中写入了25个字节，我们使用gdb进行调试可以看到这一点。</span><br><span class="line"></span><br><span class="line">输入前：</span><br><span class="line"><span class="number">0x602000</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000021</span> &lt;=== chunk1</span><br><span class="line"><span class="number">0x602010</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000000</span></span><br><span class="line"><span class="number">0x602020</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000411</span> &lt;=== next chunk</span><br><span class="line">输入后：</span><br><span class="line"><span class="number">0x602000</span>: <span class="number">0x0000000000000000</span> <span class="number">0x0000000000000021</span></span><br><span class="line"><span class="number">0x602010</span>: <span class="number">0x4141414141414141</span> <span class="number">0x4141414141414141</span></span><br><span class="line"><span class="number">0x602020</span>: <span class="number">0x4141414141414141</span> <span class="number">0x0000000000000400</span></span><br><span class="line">    </span><br><span class="line">    可以看到next chunk的size域低字节被结束符'\x00'覆盖，这种又属于off-by-one的一个分支称为NULL byte off-by-one，我们在后面会看到off-by-one与NULL byte off-by-one在利用上的区别。还是有一点就是为什么是低字节被覆盖呢，因为我们通常使用的CPU的字节序都是小端法的，比如一个DWORD值在使用小端法的内存中是这样储存的</span><br><span class="line">    DWORD <span class="number">0x41424344</span></span><br><span class="line">内存<span class="number">0x44</span>,<span class="number">0x43</span>,<span class="number">0x42</span>,<span class="number">0x4</span></span><br></pre></td></tr></table></figure>
 
@@ -343,6 +364,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pwn/" rel="tag"># pwn</a>
+          
+        </div>
       
 
       
@@ -449,7 +476,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">categories</span>
                 </a>
               </div>
